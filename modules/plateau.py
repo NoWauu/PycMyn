@@ -24,15 +24,19 @@ class Plateau:
 
         self.mask = extend_mask(pygame.mask.from_threshold(
             self.texture, pygame.Color('blue'), (200, 200, 200, 255)))
+        
+    def update(self, Entites: pygame.sprite.Group, events: List[pygame.event.Event]):
+        """met à jour les entités"""
+        if len(Entites) > 0:
+            for enit in Entites:
+                enit.update(events)
 
-    def render(self, Entites: pygame.sprite.Group, events: List[pygame.event.Event]):
+    def render(self, Entites: pygame.sprite.Group):
         """Affiche tous les sprites en les ayant mis à jour"""
 
         self.update_texture()
         self.ecran.blit(self.texture, (0, 0))
         if len(Entites) > 0:
-            for enit in Entites:
-                enit.update(events)
             Entites.draw(self.ecran)
 
         return self.ecran, self.rect

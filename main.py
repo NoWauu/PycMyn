@@ -120,7 +120,8 @@ while run:
         vies.set_texte('vies: 0')
         run = False
 
-    game_surf, game_rect = plt.render(entite.Entity.group, events)
+    plt.update(entite.Entity.group, events)
+    game_surf, game_rect = plt.render(entite.Entity.group)
     game_rect.center = screen.get_rect().center
 
     decoration.render(screen, (game_surf, game_rect))

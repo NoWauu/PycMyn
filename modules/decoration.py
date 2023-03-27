@@ -4,6 +4,15 @@ from typing import Tuple, List
 import pygame
 
 
+class Interface:
+    def __init__(self) -> None:
+        self.elements: List['Element'] = []
+
+    def render(self):
+        """méthode d'affichage"""
+        return [(elm.image, elm.rect) for elm in self.elements]
+
+
 def render(screen: pygame.Surface, game_surf_info: Tuple[pygame.Surface, pygame.Rect]):
     """fonction d'affichage"""
     screen.blit(*game_surf_info)
