@@ -1,7 +1,7 @@
 """module principal"""
 from typing import List, Iterable, Tuple
 import pygame
-from modules.classes import Interface, Text
+from modules.classes import Interface, Text, AnimElement, Test
 
 pygame.init()
 
