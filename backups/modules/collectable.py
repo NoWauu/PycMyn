@@ -4,17 +4,17 @@ import random
 
 import pygame
 
-from modules.entite import Entity
+from modules import entite
 from modules.outils import UNIT_SIZE
 
 
-class Collectable(Entity):
+class Collectable(entite.Entity):
     """classe de gestion des collectables"""
     texture = pygame.Surface((32, 32))  # texture par défaut
 
-    def __init__(self, position: pygame.Vector3) -> None:
+    def __init__(self, position: Tuple[float, float], id: str) -> None:
         super().__init__(
-            position, (self.texture, {}, {}))
+            position, (self.texture, [], []), id, -1)
 
     @classmethod
     def settexture(cls, texture: pygame.Surface) -> pygame.Surface:
@@ -29,22 +29,22 @@ class Collectable(Entity):
 class Piece(Collectable):
     """classe de gestion des pièces"""
 
-    def __init__(self, position: pygame.Vector3) -> None:
-        super().__init__(position)
+    def __init__(self, position: Tuple[float, float]) -> None:
+        super().__init__(position, 'piece')
 
 
 class Pomme(Collectable):
     """classe de gestion des Pommes"""
 
-    def __init__(self, position: pygame.Vector3) -> None:
-        super().__init__(position)
+    def __init__(self, position: Tuple[float, float]) -> None:
+        super().__init__(position, 'pomme')
 
 
 class Super(Collectable):
     """classe de gestion des Pommes"""
 
-    def __init__(self, position: pygame.Vector3) -> None:
-        super().__init__(position)
+    def __init__(self, position: Tuple[float, float]) -> None:
+        super().__init__(position, 'super')
 
 
 def choose_pos(k: int, positions: Set[Tuple[int, int]]) -> List[Tuple[int, int]]:
@@ -71,7 +71,7 @@ def get_empty_placement(scheme: pygame.mask.Mask) -> Set[Tuple[int, int]]:
 
 def populate():
     """place les pièces sur le plateaux"""
-    scheme: pygame.mask.Mask = Entity.plateau.element.mask
+    scheme: pygame.mask.Mask = entite.Entity.plateau.mask
 
     empty_placement = get_empty_placement(scheme)
 
@@ -87,12 +87,12 @@ def populate():
     super_pos = choose_pos(4, empty_placement)
 
     for pos in pommes_pos:
-        Pomme(pygame.Vector3(pos[0] * UNIT_SIZE,
-                pos[1] * UNIT_SIZE, 1))
+        Pomme((pos[0] * UNIT_SIZE,
+                pos[1] * UNIT_SIZE))
 
     for pos in super_pos:
-        Super(pygame.Vector3(pos[0] * UNIT_SIZE,
-               pos[1] * UNIT_SIZE, 1))
+        Super((pos[0] * UNIT_SIZE,
+               pos[1] * UNIT_SIZE))
 
     # pièces
 
@@ -103,5 +103,5 @@ def populate():
 
     for pos in piece_spot:
         if pos in empty_placement:
-            Piece(pygame.Vector3(pos[0] * UNIT_SIZE,
-                   pos[1] * UNIT_SIZE, 1))
+            Piece((pos[0] * UNIT_SIZE,
+                   pos[1] * UNIT_SIZE))

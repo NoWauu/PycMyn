@@ -1,35 +1,33 @@
 """Module de gestion des Entités"""
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Set
 
 import pygame
 
-from modules import animation, plateau
+from modules.classes import AnimElement, Frame, vect2_to_tuple
+from modules import plateau
 from modules.outils import reste_etendu, UNIT_SIZE
-
-# constantes
-# introduit un bug lors du reset du joueur
 
 # fonctions de déplacement
 
 
-def haut(pos: Tuple[int, int], speed: float, dt: float):
+def haut(pos: pygame.Vector2, speed: float, dt: float):
     """déplacement vers le haut"""
-    return (pos[0], round(reste_etendu((pos[1] - speed * dt * 100), Entity.plateau.ecran.get_height())))
+    return pygame.Vector2(pos.x, round(reste_etendu((pos.y - speed * dt / 10), Frame.frames['jeux'].surface.get_width())))
 
 
-def bas(pos: Tuple[int, int], speed: float, dt: float):
+def bas(pos: pygame.Vector2, speed: float, dt: float):
     """déplacement vers le bas"""
-    return (pos[0], round(reste_etendu((pos[1] + speed * dt * 100), Entity.plateau.ecran.get_height())))
+    return pygame.Vector2(pos.x, round(reste_etendu((pos.y + speed * dt / 10), Frame.frames['jeux'].surface.get_width())))
 
 
-def gauche(pos: Tuple[int, int], speed: float, dt: float):
+def gauche(pos: pygame.Vector2, speed: float, dt: float):
     """déplacement vers la gauche"""
-    return (round(reste_etendu((pos[0] - speed * dt * 100), Entity.plateau.ecran.get_width())), pos[1])
+    return pygame.Vector2(round(reste_etendu((pos.x - speed * dt / 10), Frame.frames['jeux'].surface.get_height())), pos.y)
 
 
-def droite(pos: Tuple[int, int], speed: float, dt: float):
+def droite(pos: pygame.Vector2, speed: float, dt: float):
     """déplacement vers la droite"""
-    return (round(reste_etendu((pos[0] + speed * dt * 100), Entity.plateau.ecran.get_width())), pos[1])
+    return pygame.Vector2(round(reste_etendu((pos.x + speed * dt / 10), Frame.frames['jeux'].surface.get_height())), pos.y)
 
 
 CASE = {1: haut,
@@ -38,82 +36,64 @@ CASE = {1: haut,
         0: droite}
 
 
-class priorityGroup(pygame.sprite.Group):
-    def sort_priority(self, entity: 'Entity'):
-        return entity.priority
-
-    def draw(self, surface: pygame.Surface):
-        sprites = self.sprites()
-        for sprite in sorted(sprites, key=self.sort_priority):
-            self.spritedict[sprite] = surface.blit(sprite.image, sprite.rect)
-        self.lostsprites = []
-        return list(self.spritedict.values())
-
-
 class Entity(pygame.sprite.Sprite):
     """Classe racine des entités"""
-    group = priorityGroup()
     plateau: plateau.Plateau
+    group: Set['Entity'] = set()
 
-    def __init__(self, position: Tuple[float, float], textures: Tuple[pygame.Surface, List[pygame.Surface], List[float]], id: str, priority: int = 1) -> None:
+    def __init__(self, pos: pygame.Vector3, anim_infos: Tuple[pygame.Surface,
+                                                              Dict[str, List[Tuple[pygame.Surface, float]]]]) -> None:
         super().__init__()
-        self.id = id
-        self.priority = priority
 
-        self.position = position
-
-        self.animation = animation.Animation(
-            textures[0], textures[1], textures[2])
-        self.image = self.animation.default_texture
-
-        self.mask = pygame.mask.from_threshold(
-            self.image, (255, 255, 255), (200, 200, 200, 255))  # pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect(topleft=self.position)
-
+        self.pos = pos
         self.hard_collide = False
 
-        self.add(Entity.group)
+        # renderer
+        self.animation = AnimElement(self, anim_infos[0], anim_infos[1], 'jeux')
 
-    def collide_with_point(self, point: Tuple[int, int], rect: pygame.rect.Rect, ignore: List[pygame.sprite.Sprite] = []) -> List['Entity']:
+        Entity.group.add(self)
+
+    @classmethod
+    def collide_with_point(cls, point: pygame.Vector2, ignore: List['Entity'] = []) -> List['Entity']:
         """return a liste containing the sprites colliding with the point"""
         for enit in ignore:
             Entity.group.remove(enit)
 
-        rect.center = point
-
-        collide_ls = [
-            enit for enit in Entity.group if enit.rect.colliderect(rect)]
+        collide_ls: List['Entity'] = [
+            enit for enit in Entity.group if enit.animation.rect.collidepoint(point)]
 
         for enit in ignore:
             Entity.group.add(enit)
 
         return collide_ls
 
-    def collide_with(self) -> List['Entity']:
+    def collide_with(self, point: pygame.Vector2 | None = None) -> List['Entity']:
         """return a list containing the sprites colliding with this one"""
         Entity.group.remove(self)
-        ls = pygame.sprite.spritecollide(self, Entity.group, False)
+        ls: List['Entity'] = []
+        
+        save_pos = self.animation.rect.topleft
+        if point is not None:
+                self.animation.rect.topleft = vect2_to_tuple(point)
+        for enit in Entity.group:
+            if enit.animation.rect.colliderect(self.animation.rect):
+                ls.append(enit)
+        if point is not None:
+            self.animation.rect.topleft = save_pos
+
         Entity.group.add(self)
         return ls
 
-    def collide_wall(self, pos: Tuple[int, int]):
+    def collide_wall(self, pos: pygame.Vector2):
         """Check if the entity collide with walls"""
-        # (-pos[0], -pos[1]) is used because the top left corner of self.mask
+        # (-pos.x, -pos.y) is used because the top left corner of self.mask
         # is consider to be (0, 0). The wall's mask is therefore shift to the entity
         # Thus, it has to be reshift to (0, 0) world coordinates
-        return self.mask.overlap(Entity.plateau.mask, (-pos[0] - UNIT_SIZE, -pos[1] - UNIT_SIZE)) is not None
-
-    def update_texture(self):
-        """met à jour la texture de l'entité"""
-        image, change = self.animation.check_next_anim()
-
-        if change:
-            self.image = image
-            self.mask = pygame.mask.from_threshold(
-                self.image, (255, 255, 255), (254, 254, 254, 255))
-            self.rect = self.image.get_rect(topleft=self.position)
+        return Entity.plateau.element.mask.overlap(self.animation.mask, (pos.x + UNIT_SIZE, pos.y + UNIT_SIZE)) is not None
 
     def destroy(self) -> None:
         """détruit l'entité"""
-        self.kill()
+        self.animation.delink()
+        Entity.group.remove(self)
+        del self.animation
         del self

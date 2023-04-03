@@ -2,8 +2,7 @@
 from typing import List, Any, Tuple, Dict
 import pygame
 
-from modules import outils
-
+from modules.outils import dichotomie, Sequence
 pygame.init()
 
 # fonctions
@@ -29,7 +28,7 @@ class Interface:
 
     def add_element(self, element: 'Element'):
         """ajoute un élément à la liste"""
-        index: int = outils.dichotomie(
+        index: int = dichotomie(
             [elm.pos.z for elm in self.elements], element.pos.z)
         self.elements.insert(index, element)
         element.interface = self
@@ -181,57 +180,42 @@ class AnimElement(Element):
     """classe de gestion des animations"""
 
     def __init__(self, objet: Any, default_texture: pygame.Surface,
-                 textures: Dict[str, List[pygame.Surface]],
-                 times: Dict[str, List[float]], interface_nom: str | None = None) -> None:
+                 textures: Dict[str, List[Tuple[pygame.Surface, float]]],
+                 interface_nom: str | None = None) -> None:
         """infos: temps en millisecondes"""
         self.default_texture = default_texture
         self.textures = textures
-        self.times = times
-        self.valide_start = True
-        self.current_anim_nom: str
 
-        self.anim_index: int
-        self.is_in_animation = False
-        self.start_anim_time: int = 0
+        self.current_texture: pygame.Surface = self.default_texture
+
+        self.seq = Sequence([])
 
         super().__init__(objet, self.default_texture,
                          self.default_texture.get_rect(), interface_nom)
 
+    def set_current_texture(self, texture: pygame.Surface):
+        """change la texture utilisée"""
+        self.current_texture = texture
+
     def reset_anim(self):
         """reset les animations"""
-        self.is_in_animation = False
-        self.anim_index = 0
         self.valide_start = False
 
     def start_anim(self, nom: str):
         """déclenche une animation"""
-        self.is_in_animation = True
-        self.anim_index = 0
-        self.current_anim_nom = nom
-        self.valide_start = False
-        self.start_anim_time = pygame.time.get_ticks()
+        self.seq = Sequence(
+            [((self.set_current_texture, [tpl[0]]), tpl[1]) for tpl in self.textures[nom]])
+        self.seq.start()
 
     def check_next_anim(self) -> Tuple[pygame.Surface, bool]:
         """si le temps lié à l'animation est écoulé,
         passe à la texture suivante"""
-        time = pygame.time.get_ticks()
         change = False
-        if not self.valide_start:
-            self.valide_start = True
-            change = True
-        if self.is_in_animation and time - self.start_anim_time >= self.times[self.current_anim_nom][self.anim_index]:
-            self.anim_index += 1
-            self.start_anim_time = time
-            change = True
-
-        if self.is_in_animation and self.anim_index >= len(self.textures[self.current_anim_nom]):
-            self.is_in_animation = False
-            return self.default_texture, True
-
-        if not self.is_in_animation:
-            return self.default_texture, change
-
-        return self.textures[self.current_anim_nom][self.anim_index], change
+        if self.seq.is_running:
+            change = self.seq.update()
+        else:
+            self.current_texture = self.default_texture
+        return self.current_texture, change
 
     def update(self):
         """méthode de mise à jour"""
