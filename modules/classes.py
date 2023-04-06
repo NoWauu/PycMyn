@@ -2,7 +2,7 @@
 from typing import List, Any, Tuple, Dict
 import pygame
 
-from modules.outils import dichotomie, Sequence
+from modules.outils import dichotomie, forme_mask, Sequence
 pygame.init()
 
 # fonctions
@@ -11,6 +11,7 @@ pygame.init()
 def vect2_to_tuple(vecteur: pygame.Vector2):
     """convertie un vecteur2 en tuple d'entier"""
     return round(vecteur.x), round(vecteur.y)
+
 
 # classes
 
@@ -67,9 +68,9 @@ class Element:
     d'un élément graphique
     """
 
-    def __init__(self, objet: Any, surface: pygame.Surface, rectangle: pygame.Rect, interface_nom: str | None = None) -> None:
+    def __init__(self, objet: Any, surface: pygame.Surface, rectangle: pygame.Rect, need_forming: bool = True, interface_nom: str | None = None) -> None:
         self.surface = surface
-        self.mask = pygame.mask.from_surface(self.surface, threshold=1)
+        self.mask = forme_mask(surface) if need_forming else pygame.mask.from_surface(surface)
         self.rect = rectangle
         self.objet = objet
         self.backup_rotation = 0
@@ -107,7 +108,7 @@ class Element:
             self.surface = pygame.transform.rotate(
                 self.surface, self.objet.rotation - self.backup_rotation)
             self.backup_rotation = self.objet.rotation
-        self.mask = pygame.mask.from_surface(self.surface, threshold=1)
+        self.mask = forme_mask(self.surface)
 
     def render(self):
         """méthode d'affichage"""
@@ -127,7 +128,7 @@ class Frame:
         self.rect = self.surface.get_rect()
         self.pos = pos
         self.interface = interface
-        self.element = Element(self, surface, self.rect, interface_nom)
+        self.element = Element(self, surface, self.rect, False, interface_nom)
 
         if nom not in Frame.frames:
             Frame.frames[nom] = self
@@ -166,7 +167,7 @@ class StaticElement(Element):
     """création d'un modèle immuable"""
 
     def __init__(self, objet: Any, surface: pygame.Surface, mask: pygame.Mask | None = None, interface_nom: str | None = None) -> None:
-        super().__init__(objet, surface, surface.get_rect(), interface_nom)
+        super().__init__(objet, surface, surface.get_rect(), mask is None, interface_nom)
         self.ancre()
         if mask is not None:
             self.mask = mask
@@ -191,7 +192,7 @@ class AnimElement(Element):
         self.seq = Sequence([])
 
         super().__init__(objet, self.default_texture,
-                         self.default_texture.get_rect(), interface_nom)
+                         self.default_texture.get_rect(), True, interface_nom)
 
     def set_current_texture(self, texture: pygame.Surface):
         """change la texture utilisée"""
@@ -199,7 +200,7 @@ class AnimElement(Element):
 
     def reset_anim(self):
         """reset les animations"""
-        self.valide_start = False
+        self.seq.fin()
 
     def start_anim(self, nom: str):
         """déclenche une animation"""
@@ -214,6 +215,7 @@ class AnimElement(Element):
         if self.seq.is_running:
             change = self.seq.update()
         else:
+            change = self.current_texture != self.default_texture
             self.current_texture = self.default_texture
         return self.current_texture, change
 

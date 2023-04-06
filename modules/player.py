@@ -8,6 +8,7 @@ class Player(Entity):
     def __init__(self, pos: pygame.Vector3, textures: Tuple[pygame.Surface, Dict[str, List[Tuple[pygame.Surface, float]]]],
                  speed: float) -> None:
         super().__init__(pos, textures)
+        self.reset_pos = pos.xy
         # mouvements
         self.mem: int = 0
         self.direction: int = -1
@@ -73,7 +74,7 @@ class Player(Entity):
                 entity.destroy()
 
             elif isinstance(entity, fantome.Fantome):
-                if entity.is_fearing():
+                if entity.fear_state:
                     entity.reset()
 
                 elif self.health > 1:
@@ -87,7 +88,7 @@ class Player(Entity):
         """initialise une manche"""
         for enit in fantome.Fantome.fantomes:
             enit.reset()
-        self.pos.xy = pygame.Vector2(32, 32)
+        self.pos.xy = self.reset_pos
 
     def update(self):
         """met à jour l'entité"""

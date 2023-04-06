@@ -5,12 +5,12 @@ import random
 import pygame
 
 from modules.entite import Entity
-from modules.outils import UNIT_SIZE
+from modules.outils import UNIT_SIZE, forme_mask
 
 
 class Collectable(Entity):
     """classe de gestion des collectables"""
-    texture = pygame.Surface((32, 32))  # texture par défaut
+    texture = pygame.Surface((UNIT_SIZE, UNIT_SIZE))  # texture par défaut
 
     def __init__(self, position: pygame.Vector3) -> None:
         super().__init__(
@@ -63,25 +63,16 @@ def get_empty_placement(scheme: pygame.mask.Mask) -> Set[Tuple[int, int]]:
     """renvoie un dictionnaire constitué des positions libres du mask"""
     width, height = scheme.get_size()
 
-    return {(x, y) for y in range(height // UNIT_SIZE - 2)
-            for x in range(width // UNIT_SIZE - 2)
-            if not scheme.get_at(((x + 1) * UNIT_SIZE + 16,
-                                  (y + 1) * UNIT_SIZE + 16))}
+    return {(x, y) for y in range(height // UNIT_SIZE)
+            for x in range(width // UNIT_SIZE)
+            if not scheme.get_at((x * UNIT_SIZE,
+                                  y * UNIT_SIZE))}
 
 
-def populate():
+def populate(surface: pygame.Surface):
     """place les pièces sur le plateaux"""
-    scheme: pygame.mask.Mask = Entity.plateau.element.mask
-
-    empty_placement = get_empty_placement(scheme)
-
-    empty_placement.remove((3, 3))  # à retirer
-    empty_placement.remove((4, 3))
-    empty_placement.remove((5, 3))
-    empty_placement.remove((6, 3))
-
-    empty_placement.remove((3, 2))
-    empty_placement.remove((6, 2))
+    mask = forme_mask(surface)
+    empty_placement = get_empty_placement(mask)
 
     pommes_pos = choose_pos(4, empty_placement)
     super_pos = choose_pos(4, empty_placement)
@@ -96,9 +87,6 @@ def populate():
 
     # pièces
 
-    piece_scheme = None  # à changer
-
-    # à changer en get_empty_placement(piece_scheme)
     piece_spot = empty_placement
 
     for pos in piece_spot:

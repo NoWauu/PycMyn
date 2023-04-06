@@ -104,8 +104,8 @@ class Fantome(entite.Entity):
         self.dt = pygame.time.get_ticks() - self.tlf
         self.tlf = pygame.time.get_ticks()
 
-        #self.seq.update()
-        #self.controle()
+        self.seq.update()
+        self.controle()
 
         self.fear_seq.update()
 
