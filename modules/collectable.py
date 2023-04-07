@@ -72,6 +72,7 @@ def get_empty_placement(scheme: pygame.mask.Mask) -> Set[Tuple[int, int]]:
 def populate(surface: pygame.Surface):
     """place les pièces sur le plateaux"""
     mask = forme_mask(surface)
+    mask.draw(pygame.mask.from_surface(pygame.image.load('ressources/fantome_map.png')), (0, 0))
     empty_placement = get_empty_placement(mask)
 
     pommes_pos = choose_pos(4, empty_placement)

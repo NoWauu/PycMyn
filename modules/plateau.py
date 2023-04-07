@@ -12,5 +12,7 @@ class Plateau:
         surface = pygame.image.load('ressources/map.png')
         print(surface.get_size())
         self.pos = pygame.Vector3(0, 0, 0) #pygame.Vector3(-16, -16, 0)
-        mask = extend_mask(forme_mask(surface))
+        mask = forme_mask(surface)
+        mask.erase(pygame.mask.from_surface(pygame.image.load('ressources/fantome_map.png')), (0, 0))
+        mask = extend_mask(mask)
         self.element = StaticElement(self, surface, mask, 'jeux')

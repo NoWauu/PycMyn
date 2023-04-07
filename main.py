@@ -67,7 +67,6 @@ def check_defaite():
 
 # -- mis en place
 
-
 screen = pygame.display.set_mode((1200, 640), pygame.RESIZABLE)
 width, height = screen.get_size()
 
@@ -110,11 +109,9 @@ pygame.draw.rect(texture_porte, (250, 175, 90),
 
 # définition des entités
 
-
 joueur = player.Player(
     pygame.Vector3(UNIT_SIZE, UNIT_SIZE, 2), (texture_player, {'normal': [(texture_player, 0), (texture_player_2, 200), (texture_player, 200)]}), 1.5)
 
-# 240, 220, 2
 fantome1 = fantome.Fantome(pygame.Vector3(400, 16, 2), (texture_fantome, {'fear': [(texture_fantome_fear, 0), (
     texture_fantome_fear, 3000)], 'fear_blink': [(texture_fantome_fear, 0), (texture_fantome_fear_2, 200), (texture_fantome, 200)]}))
 
