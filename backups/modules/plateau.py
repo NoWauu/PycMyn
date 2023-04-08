@@ -12,7 +12,7 @@ class Plateau:
     def __init__(self, width: int, height: int) -> None:
         self.ecran: pygame.surface.Surface = pygame.Surface(
             (width * UNIT_SIZE, height * UNIT_SIZE))
-        self.texture = pygame.image.load('ressources/plateau.jpg')
+        self.texture = pygame.image.load('ressources/textures/plateau.jpg')
         self.mask = extend_mask(pygame.mask.from_threshold(
             self.texture, pygame.Color('blue'), (1, 1, 1, 255)))
 

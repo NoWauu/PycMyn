@@ -3,7 +3,8 @@ from typing import Tuple, List, Dict
 
 import pygame
 
-from modules.outils import Sequence
+from modules.classes import Sequence
+from modules.outils import UNIT_SIZE
 from modules import entite
 
 
@@ -19,10 +20,9 @@ class Fantome(entite.Entity):
         self.start_pos = position.xy
         self.direction: int = 0  # a modifier potentiellement
         self.direction_new: int = self.direction
-        self.tester = []
         self.speed = 1.4
 
-        self.tlf = 0
+        self.time = 0
 
         self.fear_state = False
         self.fear_seq = Sequence([((self.set_fear, [False]), 4000)], loop=True)
@@ -81,8 +81,9 @@ class Fantome(entite.Entity):
             if (self.direction + 2) % 4 in directions:
                 directions.remove((self.direction + 2) % 4)
             self.direction_new = choix_direction(directions)
+            self.direction_cooldown = 10
 
-        # si il y a une nouvelle direction, on la met à jour
+        # s'il y a une nouvelle direction, on la met à jour
         if self.direction_new != -1:
             self.move_direction(self.direction_new)
             self.direction = self.direction_new
@@ -101,8 +102,9 @@ class Fantome(entite.Entity):
         self.fear_state = fear
 
     def update(self):
-        self.dt = pygame.time.get_ticks() - self.tlf
-        self.tlf = pygame.time.get_ticks()
+        """mise à jour"""
+        self.dt = pygame.time.get_ticks() - self.time
+        self.time = pygame.time.get_ticks()
 
         self.seq.update()
         self.controle()
@@ -116,11 +118,62 @@ class Fantome(entite.Entity):
 class Porte(entite.Entity):
     """gestion des portes"""
 
-    def __init__(self, position: pygame.Vector3, texture: pygame.Surface) -> None:
+    def __init__(self, position: pygame.Vector3, width: int) -> None:
+        texture = pygame.Surface((width, UNIT_SIZE))
+        pygame.draw.rect(texture, (250, 175, 90),
+                 pygame.rect.Rect(0, (UNIT_SIZE - 4) // 2, width, 4))
         super().__init__(position, (texture, {}))
         self.hard_collide = True
 
 
 def choix_direction(directions: List[int]):
+    """
+    renvoie une direction au
+    choix parmi celles proposées
+    """
     choix = random.choice(directions)
     return choix
+
+'''
+def find_exit(fantomes: List[Fantome], porte: Porte):
+    """sort les fantomes de la zone de départ"""
+
+    for fantome in fantomes:
+        pos = fantome.pos.xy
+        pos_porte = porte.pos.xy
+
+        path, succes = path_find(entite.Entity.plateau.element.mask, pos, pos_porte)
+        if succes:
+            # on crée une séquence que
+            # le fantome va suivre
+            Sequence()
+
+def path_find(mask: pygame.mask.Mask, pos: pygame.Vector2, fin: pygame.Vector2,
+              visited: List[pygame.Vector2] = []) -> Tuple[List[pygame.Vector2], bool]:
+    """trouve un chemin depuis le point de départ jusqu'à l'arrivée"""
+
+    if (fin - pos).length_squared() < UNIT_SIZE ** 2:
+        return visited, True
+
+    for direction in range(4):
+        position = pos + ((1 if direction // 2 == 0 else -1) *
+                          (pygame.Vector2(UNIT_SIZE, 0) if direction % 2 == 0 else pygame.Vector2(UNIT_SIZE, 1)))
+        res = False
+        path = []
+        if not mask.get_at(position) and pos not in visited:
+            path, res = path_find(mask, start, fin, position, visited + [position])
+        
+        if res:
+            return path, True
+    
+    return [], False'''
+
+# setup
+
+texture_fantome = pygame.transform.scale(
+    pygame.image.load("ressources/textures/blinky.png"), (UNIT_SIZE, UNIT_SIZE))
+
+texture_fantome_fear = pygame.transform.scale(
+    pygame.image.load("ressources/textures/stun.png"), (UNIT_SIZE, UNIT_SIZE))
+texture_fantome_fear_2 = pygame.transform.scale(
+    pygame.image.load("ressources/textures/stun2.png"), (UNIT_SIZE, UNIT_SIZE))

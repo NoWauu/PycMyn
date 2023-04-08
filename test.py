@@ -4,7 +4,7 @@ pygame.init()
 
 WINDOW = pygame.display.set_mode((600, 600))
 
-surface = pygame.transform.scale(pygame.image.load('ressources/map.png'), (224, 248))
+surface = pygame.transform.scale(pygame.image.load('ressources/textures/map.png'), (224, 248))
 #surface.fill('#FFFFA0')
 
 pygame.draw.circle(surface, '#FFA0FF', (8, 8), 8)

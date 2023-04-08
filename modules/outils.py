@@ -1,5 +1,5 @@
 """module outils"""
-from typing import List, Tuple, Callable, Any
+from typing import List
 import pygame
 
 # constantes
@@ -72,7 +72,7 @@ def extend_mask(mask: pygame.mask.Mask) -> pygame.mask.Mask:
 def forme_mask(surface: pygame.Surface):
     """crée un mask à partir d'une surface donnée"""
     mask = pygame.Mask((UNIT_SIZE, UNIT_SIZE), True)
-    if surface.get_width() % UNIT_SIZE != 0 or surface.get_height() % UNIT_SIZE:
+    if surface.get_width() % UNIT_SIZE or surface.get_height() % UNIT_SIZE:
         raise ValueError
     
     surf_mask = pygame.mask.from_surface(surface, 1)
@@ -85,52 +85,3 @@ def forme_mask(surface: pygame.Surface):
             if surf_mask.overlap(mask, (UNIT_SIZE * coordx, UNIT_SIZE * coordy)) is not None:
                 forme_surf_mask.draw(mask, (UNIT_SIZE * coordx, UNIT_SIZE * coordy))
     return forme_surf_mask
-
-
-# classes
-
-class Sequence:
-    """classe de gestion des séquences"""
-
-    def __init__(self, seq: List[Tuple[Tuple[Callable[..., None], List[Any]] | None, float]],
-                 last_call: Tuple[Callable[..., None], List[Any]] = (lambda: None, []), loop: bool = False) -> None:
-
-        self.fnct: List[Tuple[Callable[..., None], List[Any]] | None] = []
-        self.times: List[float] = []
-        self.is_running = False
-        self.sqc_timer = pygame.time.get_ticks()
-        self.pointer = 0
-        self.loop = loop
-
-        for elm in seq:
-            self.fnct.append(elm[0])
-            self.times.append(elm[1])
-
-    def start(self):
-        """commence la séquence"""
-        self.is_running = True
-        self.pointer = 0
-        self.sqc_timer = pygame.time.get_ticks()
-
-    def fin(self):
-        """met fin à la séquence"""
-        self.is_running = False
-
-    def update(self):
-        """met à jour la séquence"""
-        if not self.is_running or (self.times[self.pointer] >
-                                   pygame.time.get_ticks() - self.sqc_timer):
-            return False
-
-        fnct = self.fnct[self.pointer]
-        if fnct is not None:
-            fnct[0](*fnct[1])
-        self.pointer += 1
-        self.sqc_timer = pygame.time.get_ticks()
-
-        if self.pointer >= len(self.times):
-            if self.loop:
-                self.start()
-            else:
-                self.is_running = False
-        return True

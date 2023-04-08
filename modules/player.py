@@ -2,6 +2,7 @@ import pygame
 from typing import Tuple, List, Dict
 from modules.entite import Entity, CASE
 from modules import collectable, fantome
+from modules.outils import UNIT_SIZE
 
 
 class Player(Entity):
@@ -102,3 +103,12 @@ class Player(Entity):
             self.animation.start_anim('normal')
 
         self.interact()
+
+# setup
+
+texture_player = pygame.transform.smoothscale(
+    pygame.image.load("ressources/textures/pacman.png"), (UNIT_SIZE, UNIT_SIZE))
+
+texture_player_2 = pygame.Surface((UNIT_SIZE, UNIT_SIZE), pygame.SRCALPHA)
+texture_player_2.fill(pygame.Color(255, 255, 255, 10))
+pygame.draw.circle(texture_player_2, "#FFCC00", (UNIT_SIZE // 2, UNIT_SIZE // 2), UNIT_SIZE // 2)

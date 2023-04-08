@@ -35,7 +35,7 @@ pygame.draw.circle(texture_piece, (250, 198, 53), (16, 16), 3)
 
 texture_pomme = pygame.Surface((32, 32))
 texture_pomme.blit(pygame.transform.scale(
-    pygame.image.load("ressources/pomme.png"), (16, 16)), (8, 8))
+    pygame.image.load("ressources/textures/pomme.png"), (16, 16)), (8, 8))
 
 texture_super = pygame.Surface((32, 32), pygame.SRCALPHA)
 pygame.draw.circle(texture_super, (255, 255, 255), (16, 16), 6)
@@ -47,16 +47,16 @@ collectable.Super.settexture(texture_super)
 # -- debug
 
 texture_player = pygame.transform.smoothscale(
-    pygame.image.load("ressources/pacman.png"), (32, 32))
+    pygame.image.load("ressources/textures/pacman.png"), (32, 32))
 
 texture_player_2 = pygame.Surface((32, 32), pygame.SRCALPHA)
 pygame.draw.circle(texture_player_2, "#FFCC00", (16, 16), 16)
 
 texture_fantome = pygame.transform.scale(
-    pygame.image.load("ressources/blinky.png"), (32, 32))
+    pygame.image.load("ressources/textures/blinky.png"), (32, 32))
 
 texture_fantome_fear = pygame.transform.scale(
-    pygame.image.load("ressources/stun.png"), (32, 32))
+    pygame.image.load("ressources/textures/stun.png"), (32, 32))
 
 texture_porte = pygame.Surface((32, 32))
 pygame.draw.rect(texture_porte, (250, 175, 90),

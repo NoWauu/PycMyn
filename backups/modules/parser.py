@@ -2,7 +2,7 @@ from PIL import Image
 from outils import UNIT_SIZE
 
 
-with open("ressources/plateau.txt", "r") as file:
+with open("ressources/textures/plateau.txt", "r") as file:
     texte = file.readlines()
     rep = []
 
@@ -33,4 +33,4 @@ for x in range(size[1]):
                         (x*UNIT_SIZE + j, y*UNIT_SIZE + i), (0, 0, 255))
 
 img.show()
-img.save('ressources/plateau.jpg')
+img.save('ressources/textures/plateau.jpg')
