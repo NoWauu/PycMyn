@@ -16,13 +16,19 @@ RelativePos.window = WINDOW
 
 def initialise():
     """fonction d'initialisation"""
-    interface_jeux = Interface('jeux')
-    interface_principale = Interface('principale')
-    Frame('jeux', interface_jeux, pygame.Surface((448, 496)),
-          RelativePos(0.5, 0.5, 0), 'principale')
-    Bouton(pygame.Vector3(0, 0, 3), POLICE.render('Hello', True, '#FFFFFF'), lambda: print('hi'), 'principale')
+    # définition de la zone de jeux
+    interface_plateau = Interface('plateau')
+    Interface('jeux')
+    Frame('plateau', interface_plateau, pygame.Surface((448, 496)),
+          RelativePos(0.5, 0.5, 0), 'jeux')
+    
+    # création du menu
+    interface_menu = Interface('menu')
 
-    Interface.current_interface = interface_principale
+    Bouton(RelativePos(0.5, 0.5, 1), POLICE.render('Jouer', True, '#FFFFFF'),
+           lambda: Interface.change_interface('jeux'), 'menu')
+
+    Interface.current_interface = interface_menu
 
 
 def handle_event(events: List[pygame.event.Event]) -> bool:

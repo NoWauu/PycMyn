@@ -14,4 +14,4 @@ class Plateau:
         mask = forme_mask(surface)
         mask.erase(pygame.mask.from_surface(pygame.image.load('ressources/textures/fantome_map.png')), (0, 0))
         mask = extend_mask(mask)
-        self.element = StaticElement(self, surface, mask, 'jeux')
+        self.element = StaticElement(self, surface, mask, 'plateau')

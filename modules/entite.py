@@ -12,22 +12,22 @@ from modules.outils import reste_etendu, UNIT_SIZE
 
 def haut(pos: pygame.Vector2, speed: float, dt: float):
     """déplacement vers le haut"""
-    return pygame.Vector2(pos.x, round(reste_etendu((pos.y - speed * dt / 10), Frame.frames['jeux'].surface.get_height())))
+    return pygame.Vector2(pos.x, round(reste_etendu((pos.y - speed * dt / 10), Frame.frames['plateau'].surface.get_height())))
 
 
 def bas(pos: pygame.Vector2, speed: float, dt: float):
     """déplacement vers le bas"""
-    return pygame.Vector2(pos.x, round(reste_etendu((pos.y + speed * dt / 10), Frame.frames['jeux'].surface.get_height())))
+    return pygame.Vector2(pos.x, round(reste_etendu((pos.y + speed * dt / 10), Frame.frames['plateau'].surface.get_height())))
 
 
 def gauche(pos: pygame.Vector2, speed: float, dt: float):
     """déplacement vers la gauche"""
-    return pygame.Vector2(round(reste_etendu((pos.x - speed * dt / 10), Frame.frames['jeux'].surface.get_width())), pos.y)
+    return pygame.Vector2(round(reste_etendu((pos.x - speed * dt / 10), Frame.frames['plateau'].surface.get_width())), pos.y)
 
 
 def droite(pos: pygame.Vector2, speed: float, dt: float):
     """déplacement vers la droite"""
-    return pygame.Vector2(round(reste_etendu((pos.x + speed * dt / 10), Frame.frames['jeux'].surface.get_width())), pos.y)
+    return pygame.Vector2(round(reste_etendu((pos.x + speed * dt / 10), Frame.frames['plateau'].surface.get_width())), pos.y)
 
 
 CASE = {1: haut,
@@ -49,7 +49,7 @@ class Entity(pygame.sprite.Sprite):
         self.hard_collide = False
 
         # renderer
-        self.animation = AnimElement(self, anim_infos[0], anim_infos[1], 'jeux')
+        self.animation = AnimElement(self, anim_infos[0], anim_infos[1], 'plateau')
 
         Entity.group.add(self)
 

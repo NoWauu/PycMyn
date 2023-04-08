@@ -118,6 +118,11 @@ class Interface:
         if interface_nom in cls.interfaces:
             cls.interfaces[interface_nom].add_element(element)
 
+    @classmethod
+    def change_interface(cls, interface_nom: str):
+        """change l'interface actuelle"""
+        cls.current_interface = cls.interfaces[interface_nom]
+
 
 class Element:
     """
@@ -303,7 +308,7 @@ class AnimElement(Element):
 class Bouton:
     """classe de représentation d'un bouton"""
 
-    def __init__(self, pos: pygame.Vector3, surface: pygame.Surface, fnct: Callable[[], None],
+    def __init__(self, pos: pygame.Vector3 | RelativePos, surface: pygame.Surface, fnct: Callable[[], None],
                  interface_nom: str | None = None, click: int = 1) -> None:
         self.pos = pos
         self.element = Element(
