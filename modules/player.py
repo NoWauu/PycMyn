@@ -1,8 +1,8 @@
 import pygame
 from typing import Tuple, List, Dict
-from modules.entite import Entity, CASE
+from modules.entite import Entity, CASE, UNIT_SIZE
 from modules import collectable, fantome
-from modules.outils import UNIT_SIZE
+from modules.graphics import Interface
 
 
 class Player(Entity):
@@ -77,6 +77,10 @@ class Player(Entity):
             if isinstance(entity, collectable.Collectable):
                 self.collect(entity)
                 entity.destroy()
+                
+                # s'il n'y a plus de pièce, on gagne
+                if len(collectable.Piece.pieces) == 0:
+                    Interface.change_interface('menu')
 
             elif isinstance(entity, fantome.Fantome):
                 if entity.fear_state:
@@ -87,7 +91,8 @@ class Player(Entity):
                     self.reset()
 
                 else:
-                    self.destroy()
+                    reset()
+                    Interface.change_interface('menu')
 
     def reset(self):
         """initialise une manche"""
@@ -110,9 +115,22 @@ class Player(Entity):
 
 # setup
 
-texture_player = pygame.transform.smoothscale(
-    pygame.image.load("ressources/textures/pacman.png"), (UNIT_SIZE, UNIT_SIZE))
 
-texture_player_2 = pygame.Surface((UNIT_SIZE, UNIT_SIZE), pygame.SRCALPHA)
-texture_player_2.fill(pygame.Color(255, 255, 255, 10))
-pygame.draw.circle(texture_player_2, "#FFCC00", (UNIT_SIZE // 2, UNIT_SIZE // 2), UNIT_SIZE // 2)
+def reset():
+    """réinitialise tous les éléments du jeux"""
+    Entity.group.clear()
+
+
+def initialisation():
+    """initialisation"""
+    texture_player = pygame.transform.smoothscale(
+        pygame.image.load("ressources/textures/pacman.png"), (UNIT_SIZE, UNIT_SIZE))
+
+    texture_player_2 = pygame.Surface((UNIT_SIZE, UNIT_SIZE), pygame.SRCALPHA)
+    texture_player_2.fill(pygame.Color(255, 255, 255, 10))
+    pygame.draw.circle(texture_player_2, "#FFCC00",
+                       (UNIT_SIZE // 2, UNIT_SIZE // 2), UNIT_SIZE // 2)
+
+    Player(pygame.Vector3(UNIT_SIZE, UNIT_SIZE, 2), (texture_player, {'normal': [(texture_player, 0),
+                                                                                 (texture_player_2, 200),
+                                                                                 (texture_player, 200)]}), 1.5)

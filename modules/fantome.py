@@ -1,5 +1,5 @@
 import random
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Callable
 
 import pygame
 
@@ -14,13 +14,15 @@ class Fantome(entite.Entity):
 
     def __init__(self, position: pygame.Vector3,
                  textures: Tuple[pygame.Surface, Dict[str, List[Tuple[pygame.Surface, float]]]],
-                 comportement=None) -> None:
+                 comportement: Callable[[List[int]], int]) -> None:
         super().__init__(position, textures)
         # mouvements
         self.start_pos = position.xy
         self.direction: int = 0  # a modifier potentiellement
         self.direction_new: int = self.direction
         self.speed = 1.4
+
+        self.comportement = comportement
 
         self.time = 0
 
@@ -53,7 +55,7 @@ class Fantome(entite.Entity):
         """change le fantome de direction"""
         directions = self.calc_directions()
         if directions != []:
-            self.direction_new = choix_direction(directions)
+            self.direction_new = self.comportement(directions)
 
     def move_direction(self, direction: int):
         """bouge dans une direction"""
@@ -81,7 +83,7 @@ class Fantome(entite.Entity):
             # on fait en sorte que le fantome ne revienne pas sur ses pas
             if (self.direction + 2) % 4 in directions:
                 directions.remove((self.direction + 2) % 4)
-            self.direction_new = choix_direction(directions)
+            self.direction_new = self.comportement(directions)
             self.direction_cooldown = 10
 
         # s'il y a une nouvelle direction, on la met à jour
@@ -122,12 +124,14 @@ class Porte(entite.Entity):
     def __init__(self, position: pygame.Vector3, width: int) -> None:
         texture = pygame.Surface((width, UNIT_SIZE))
         pygame.draw.rect(texture, (250, 175, 90),
-                 pygame.rect.Rect(0, (UNIT_SIZE - 4) // 2, width, 4))
+                         pygame.rect.Rect(0, (UNIT_SIZE - 4) // 2, width, 4))
         super().__init__(position, (texture, {}))
         self.hard_collide = True
 
+# comportements
 
-def choix_direction(directions: List[int]):
+
+def aleatoire(directions: List[int]):
     """
     renvoie une direction au
     choix parmi celles proposées
@@ -138,10 +142,21 @@ def choix_direction(directions: List[int]):
 
 # setup
 
-texture_fantome = pygame.transform.scale(
-    pygame.image.load("ressources/textures/blinky.png"), (UNIT_SIZE, UNIT_SIZE))
+def initialisation():
+    """initialisation des fantomes"""
+    texture_fantome = pygame.transform.scale(
+        pygame.image.load("ressources/textures/blinky.png"), (UNIT_SIZE, UNIT_SIZE))
 
-texture_fantome_fear = pygame.transform.scale(
-    pygame.image.load("ressources/textures/stun.png"), (UNIT_SIZE, UNIT_SIZE))
-texture_fantome_fear_2 = pygame.transform.scale(
-    pygame.image.load("ressources/textures/stun2.png"), (UNIT_SIZE, UNIT_SIZE))
+    texture_fantome_fear = pygame.transform.scale(
+        pygame.image.load("ressources/textures/stun.png"), (UNIT_SIZE, UNIT_SIZE))
+    texture_fantome_fear_2 = pygame.transform.scale(
+        pygame.image.load("ressources/textures/stun2.png"), (UNIT_SIZE, UNIT_SIZE))
+
+    Fantome(pygame.Vector3(196, 225, 2), (texture_fantome, {'fear': [(texture_fantome_fear, 0),
+                                                                     (texture_fantome_fear, 3000)],
+                                                            'fear_blink': [(texture_fantome_fear, 0),
+                                                                           (texture_fantome_fear_2, 200),
+                                                                           (texture_fantome, 200)]}),
+            aleatoire)
+
+    Porte(pygame.Vector3(208, 196, 1), 32)

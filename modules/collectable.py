@@ -28,9 +28,14 @@ class Collectable(Entity):
 
 class Piece(Collectable):
     """classe de gestion des pièces"""
-
+    pieces: Set['Piece'] = set()
     def __init__(self, position: pygame.Vector3) -> None:
         super().__init__(position)
+        Piece.pieces.add(self)
+
+    def destroy(self) -> None:
+        Piece.pieces.remove(self)
+        return super().destroy()
 
 
 class Pomme(Collectable):
