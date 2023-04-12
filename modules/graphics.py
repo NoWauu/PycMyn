@@ -23,8 +23,7 @@ def vect2_to_tuple(vecteur: pygame.Vector2):
 class Sequence:
     """classe de gestion des séquences"""
 
-    def __init__(self, seq: List[Tuple[Tuple[Callable[..., None], List[Any]] | None, float]],
-                 last_call: Tuple[Callable[..., None], List[Any]] = (lambda: None, []), loop: bool = False) -> None:
+    def __init__(self, seq: List[Tuple[Tuple[Callable[..., None], List[Any]] | None, float]], loop: bool = False) -> None:
 
         self.fnct: List[Tuple[Callable[..., None], List[Any]] | None] = []
         self.times: List[float] = []

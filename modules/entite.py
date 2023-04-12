@@ -3,7 +3,7 @@ from typing import List, Tuple, Dict, Set
 
 import pygame
 
-from modules.classes import AnimElement, Frame, vect2_to_tuple
+from modules.graphics import AnimElement, Frame, vect2_to_tuple
 from modules import plateau
 from modules.outils import reste_etendu, UNIT_SIZE
 

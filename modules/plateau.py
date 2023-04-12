@@ -1,7 +1,7 @@
 """module de création du plateau"""
 import pygame
 
-from modules.classes import StaticElement
+from modules.graphics import StaticElement
 from modules.outils import extend_mask, forme_mask
 
 

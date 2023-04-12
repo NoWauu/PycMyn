@@ -3,7 +3,7 @@ from typing import Tuple, List, Dict
 
 import pygame
 
-from modules.classes import Sequence
+from modules.graphics import Sequence
 from modules.outils import UNIT_SIZE
 from modules import entite
 

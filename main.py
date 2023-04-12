@@ -1,7 +1,7 @@
 """module principal"""
 from typing import List
 import pygame
-from modules.classes import Interface, Frame, Bouton, POLICE, RelativePos
+from modules.graphics import Interface, Frame, Bouton, POLICE, RelativePos
 from modules.outils import UNIT_SIZE
 from modules import collectable, entite, plateau, fantome, player
 

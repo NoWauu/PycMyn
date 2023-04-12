@@ -54,6 +54,10 @@ class Player(Entity):
                     not any([enit.hard_collide for enit in
                              self.collide_with(futur)])):
                 self.pos.xy = futur
+            else:
+                futur = CASE[self.mem](self.pos.xy, 10/self.dt, self.dt)
+                if self.collide_wall(futur):
+                    self.pos.xy = futur
 
     def collect(self, entity: Entity):
         """gestion de la collecte des collectables"""
