@@ -71,13 +71,13 @@ def get_empty_placement(scheme: pygame.mask.Mask) -> Set[Tuple[int, int]]:
 
 def populate(surface: pygame.Surface):
     """place les pièces sur le plateaux"""
-    mask = forme_mask(surface)
+    mask = forme_mask(surface, UNIT_SIZE)
     mask.draw(pygame.mask.from_surface(pygame.image.load('ressources/textures/fantome_map.png')), (0, 0))
     empty_placement = get_empty_placement(mask)
 
     pommes_pos = choose_pos(4, empty_placement)
     super_pos = choose_pos(4, empty_placement)
-
+    
     for pos in pommes_pos:
         Pomme(pygame.Vector3(pos[0] * UNIT_SIZE,
                 pos[1] * UNIT_SIZE, 1))

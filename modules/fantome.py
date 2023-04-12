@@ -52,7 +52,8 @@ class Fantome(entite.Entity):
     def change_direction(self):
         """change le fantome de direction"""
         directions = self.calc_directions()
-        self.direction_new = choix_direction(directions)
+        if directions != []:
+            self.direction_new = choix_direction(directions)
 
     def move_direction(self, direction: int):
         """bouge dans une direction"""

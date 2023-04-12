@@ -10,7 +10,7 @@ class Plateau:
 
     def __init__(self) -> None:
         surface = pygame.image.load('ressources/textures/map.png')
-        self.pos = pygame.Vector3(-16, -16, 0) #pygame.Vector3(0, 0, 0)
+        self.pos = pygame.Vector3(0, 0, 0) #pygame.Vector3(-16, -16, 0)
         mask = forme_mask(surface, 8)
         mask = extend_mask(mask)
-        self.element = StaticElement(self, mask.to_surface(), mask, 'plateau')
+        self.element = StaticElement(self, surface, mask, 'plateau')

@@ -60,8 +60,7 @@ initialise()
 # setup debug
 
 def check_victory():
-    ...
-    #return not any([isinstance(entity, collectable.Piece) for entity in entite.Entity.group])
+    return not any([isinstance(entity, collectable.Piece) for entity in entite.Entity.group])
 
 
 def check_defaite():
@@ -95,7 +94,7 @@ clock = pygame.time.Clock()
 
 # initialisation du terrain
 
-#collectable.populate(plt.element.surface)
+collectable.populate(plt.element.surface)
 
 # boucle principale
 

@@ -30,10 +30,16 @@ def droite(pos: pygame.Vector2, speed: float, dt: float):
     return pygame.Vector2(round(reste_etendu((pos.x + speed * dt / 10), Frame.frames['plateau'].surface.get_width())), pos.y)
 
 
+def immobile(pos: pygame.Vector2, speed: float, dt: float):
+    """reste immobile"""
+    return pos
+
+
 CASE = {1: haut,
         3: bas,
         2: gauche,
-        0: droite}
+        0: droite,
+        -1: immobile}
 
 
 class Entity(pygame.sprite.Sprite):
