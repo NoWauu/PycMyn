@@ -2,7 +2,7 @@
 from typing import List, Any, Tuple, Dict, Callable
 import pygame
 
-from modules.outils import dichotomie, forme_mask
+from modules.outils import dichotomie, forme_mask, UNIT_SIZE
 pygame.init()
 
 
@@ -133,8 +133,8 @@ class Element:
                  interface_nom: str | None = None, need_forming: bool = True) -> None:
         self.need_forming = need_forming
         self.surface = surface
-        self.mask = forme_mask(
-            surface) if need_forming else pygame.mask.from_surface(surface)
+        self.mask = (forme_mask(surface, UNIT_SIZE)
+                     if need_forming else pygame.mask.from_surface(surface))
         self.rect = rectangle
         self.objet = objet
         self.backup_rotation = 0
@@ -176,7 +176,7 @@ class Element:
             self.surface = pygame.transform.rotate(
                 self.surface, self.objet.rotation - self.backup_rotation)
             self.backup_rotation = self.objet.rotation
-        self.mask = (forme_mask(self.surface) if self.need_forming
+        self.mask = (forme_mask(self.surface, UNIT_SIZE) if self.need_forming
                      else pygame.mask.from_surface(self.surface))
 
     def render(self):

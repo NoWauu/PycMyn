@@ -69,19 +69,19 @@ def extend_mask(mask: pygame.mask.Mask) -> pygame.mask.Mask:
     return new_mask
 
 
-def forme_mask(surface: pygame.Surface):
+def forme_mask(surface: pygame.Surface, size: int):
     """crée un mask à partir d'une surface donnée"""
-    mask = pygame.Mask((UNIT_SIZE, UNIT_SIZE), True)
-    if surface.get_width() % UNIT_SIZE or surface.get_height() % UNIT_SIZE:
+    mask = pygame.Mask((size, size), True)
+    if surface.get_width() % size or surface.get_height() % size:
         raise ValueError
     
     surf_mask = pygame.mask.from_surface(surface, 1)
     forme_surf_mask = pygame.Mask(surface.get_size())
     
-    for coordx in range(surface.get_width() // UNIT_SIZE):
-        for coordy in range(surface.get_height() // UNIT_SIZE):
+    for coordx in range(surface.get_width() // size):
+        for coordy in range(surface.get_height() // size):
             # si un pixel de la surface est actif
             # on considère la case entière comme active dans le mask
-            if surf_mask.overlap(mask, (UNIT_SIZE * coordx, UNIT_SIZE * coordy)) is not None:
-                forme_surf_mask.draw(mask, (UNIT_SIZE * coordx, UNIT_SIZE * coordy))
+            if surf_mask.overlap(mask, (size * coordx, size * coordy)) is not None:
+                forme_surf_mask.draw(mask, (size * coordx, size * coordy))
     return forme_surf_mask

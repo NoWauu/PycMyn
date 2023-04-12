@@ -134,39 +134,6 @@ def choix_direction(directions: List[int]):
     choix = random.choice(directions)
     return choix
 
-'''
-def find_exit(fantomes: List[Fantome], porte: Porte):
-    """sort les fantomes de la zone de départ"""
-
-    for fantome in fantomes:
-        pos = fantome.pos.xy
-        pos_porte = porte.pos.xy
-
-        path, succes = path_find(entite.Entity.plateau.element.mask, pos, pos_porte)
-        if succes:
-            # on crée une séquence que
-            # le fantome va suivre
-            Sequence()
-
-def path_find(mask: pygame.mask.Mask, pos: pygame.Vector2, fin: pygame.Vector2,
-              visited: List[pygame.Vector2] = []) -> Tuple[List[pygame.Vector2], bool]:
-    """trouve un chemin depuis le point de départ jusqu'à l'arrivée"""
-
-    if (fin - pos).length_squared() < UNIT_SIZE ** 2:
-        return visited, True
-
-    for direction in range(4):
-        position = pos + ((1 if direction // 2 == 0 else -1) *
-                          (pygame.Vector2(UNIT_SIZE, 0) if direction % 2 == 0 else pygame.Vector2(UNIT_SIZE, 1)))
-        res = False
-        path = []
-        if not mask.get_at(position) and pos not in visited:
-            path, res = path_find(mask, start, fin, position, visited + [position])
-        
-        if res:
-            return path, True
-    
-    return [], False'''
 
 # setup
 

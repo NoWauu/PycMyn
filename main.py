@@ -60,7 +60,8 @@ initialise()
 # setup debug
 
 def check_victory():
-    return not any([isinstance(entity, collectable.Piece) for entity in entite.Entity.group])
+    ...
+    #return not any([isinstance(entity, collectable.Piece) for entity in entite.Entity.group])
 
 
 def check_defaite():
@@ -78,7 +79,7 @@ joueur = player.Player(
                                                                                  (player.texture_player_2, 200),
                                                                                  (player.texture_player, 200)]}), 1.5)
 
-fantome1 = fantome.Fantome(pygame.Vector3(196, 220, 2), (fantome.texture_fantome, {'fear': [(fantome.texture_fantome_fear, 0), (
+fantome1 = fantome.Fantome(pygame.Vector3(196, 225, 2), (fantome.texture_fantome, {'fear': [(fantome.texture_fantome_fear, 0), (
     fantome.texture_fantome_fear, 3000)], 'fear_blink': [(fantome.texture_fantome_fear, 0), (fantome.texture_fantome_fear_2, 200), (fantome.texture_fantome, 200)]}))
 
 fantome.Porte(pygame.Vector3(208, 196, 1), 32)
@@ -94,7 +95,7 @@ clock = pygame.time.Clock()
 
 # initialisation du terrain
 
-collectable.populate(plt.element.surface)
+#collectable.populate(plt.element.surface)
 
 # boucle principale
 
