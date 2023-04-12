@@ -317,5 +317,5 @@ class Bouton:
 
     def on_click(self, event: pygame.event.Event):
         """active lors du clique"""
-        if self.click == event.button:
+        if self.element.rect.collidepoint(event.pos) and self.click == event.button:
             self.fnct()

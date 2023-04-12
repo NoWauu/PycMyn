@@ -109,4 +109,4 @@ while running:
     elif check_defaite():
         running = False
 
-    clock.tick(90)  # 90 fps
+    clock.tick(120)  # 90 fps

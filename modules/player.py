@@ -56,7 +56,7 @@ class Player(Entity):
                 self.pos.xy = futur
             else:
                 futur = CASE[self.mem](self.pos.xy, 10/self.dt, self.dt)
-                if self.collide_wall(futur):
+                if not self.collide_wall(futur):
                     self.pos.xy = futur
 
     def collect(self, entity: Entity):
