@@ -32,6 +32,8 @@ class Fantome(Entity):
 
         self.seq = Sequence(
             [((self.desire_direction, []), periode)], loop=True)
+        
+        # on met un delai sur le lancement de la séquence
         self.seq.start()
 
         Fantome.fantomes.append(self)
@@ -41,6 +43,8 @@ class Fantome(Entity):
         self.pos.xy = self.start_pos
         self.fear_state = False
         self.animation.reset_anim()
+        self.direction = 1
+        self.seq.pause(1500)
 
     def calc_directions(self):
         """calcule les différentes directions possibles"""
@@ -48,8 +52,8 @@ class Fantome(Entity):
 
     def desire_direction(self):
         """change le fantome de direction"""
+        print('in')
         self.direction = self.comportement(self, [0, 1, 2, 3])
-        print(self.direction)
 
     def contourne_mur(self):
         """fait changer le fantome de direction lorsqu'il rencontre un mur"""
@@ -84,13 +88,6 @@ class Fantome(Entity):
             new_direction = self.comportement(self, directions)
         elif len(directions) > 0:
             new_direction = directions[0]
-        else:
-            new_direction = -1
-            futur = CASE[self.memoire](self.pos.xy, 10/self.dt, self.dt)
-            # si on peut tout de même avancer légèrement
-            # on avance de 1 pixel
-            if not self.collide_wall(futur):
-                self.pos.xy = futur
 
         # s'il y a une nouvelle direction, on met à jour la position
         if new_direction != -1:
@@ -172,8 +169,10 @@ def follow(fantome: Fantome, directions: List[int]):
 def initialisation():
     """initialisation des fantomes"""
     # textures
-    texture_fantome = pygame.transform.scale(
+    texture_blinky = pygame.transform.scale(
         pygame.image.load("ressources/textures/blinky.png"), (utl.UNIT_SIZE, utl.UNIT_SIZE))
+    texture_inky = pygame.transform.scale(
+        pygame.image.load("ressources/textures/inky.png"), (utl.UNIT_SIZE, utl.UNIT_SIZE))
 
     texture_fantome_fear = pygame.transform.scale(
         pygame.image.load("ressources/textures/stun.png"), (utl.UNIT_SIZE, utl.UNIT_SIZE))
@@ -182,14 +181,23 @@ def initialisation():
 
     # entités
 
-    blinky = Fantome(pygame.Vector3(196, 225, 2), (texture_fantome, {'fear': [(texture_fantome_fear, 0),
+    blinky = Fantome(pygame.Vector3(196, 225, 2), (texture_blinky, {'fear': [(texture_fantome_fear, 0),
                                                                      (texture_fantome_fear, 3000)],
                                                             'fear_blink': [(texture_fantome_fear, 0),
                                                                            (texture_fantome_fear_2, 200),
-                                                                           (texture_fantome, 200)]}),
+                                                                           (texture_blinky, 200)]}),
+            (aleatoire, 5000))
+    inky = Fantome(pygame.Vector3(196, 225, 2), (texture_inky, {'fear': [(texture_fantome_fear, 0),
+                                                                     (texture_fantome_fear, 3000)],
+                                                            'fear_blink': [(texture_fantome_fear, 0),
+                                                                           (texture_fantome_fear_2, 200),
+                                                                           (texture_inky, 200)]}),
             (follow, 1000))
     Porte(pygame.Vector3(208, 196, 1), 32)
 
     # événements
     utl.lie('init_entities', blinky.reset)
     utl.lie('powerup', blinky.set_fear)
+
+    utl.lie('init_entities', inky.reset)
+    utl.lie('powerup', inky.set_fear)

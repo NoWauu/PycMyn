@@ -8,7 +8,6 @@ UNIT_SIZE = 16
 
 # fonctions
 
-
 def dichotomie(liste: List[float], valeur: float) -> int:
     """
     renvoie l'index d'une liste

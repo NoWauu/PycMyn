@@ -32,6 +32,8 @@ class Sequence:
         self.pointer = 0
         self.loop = loop
 
+        self.pause_seq: Sequence | None = None
+
         for elm in seq:
             self.fnct.append(elm[0])
             self.times.append(elm[1])
@@ -46,8 +48,18 @@ class Sequence:
         """met fin à la séquence"""
         self.is_running = False
 
+    def pause(self, temps: int):
+        """effectue une pause dans la séquence"""
+        self.is_running = False
+        self.pause_seq = Sequence([((lambda: setattr(self, 'is_running', True), []), temps)])
+        self.pause_seq.start()
+
     def update(self):
         """met à jour la séquence"""
+        if self.pause_seq is not None and self.pause_seq.is_running:
+            self.pause_seq.update()
+            return
+
         if not self.is_running or (self.times[self.pointer] >
                                    pygame.time.get_ticks() - self.sqc_timer):
             return False
