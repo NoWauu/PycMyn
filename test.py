@@ -1,24 +1,15 @@
+from typing import List
 import pygame
 
-pygame.init()
+def follow(pos_player: pygame.Vector2, pos: pygame.Vector2, directions: List[int]):
+    """
+    renvoie une direction au
+    choix parmi celles proposées
+    """
 
-WINDOW = pygame.display.set_mode((600, 600))
+    direct = (pos_player - pos).normalize()
+    produits_scalaires = [((direction % 2 == 0) * (-(direction // 2) * 2 + 1) * direct.x +
+      (direction % 2 == 1) * ((direction // 2) * 2 - 1) * direct.y) for direction in directions]
+    return directions[produits_scalaires.index(max(produits_scalaires))]
 
-surface = pygame.transform.scale(pygame.image.load('ressources/textures/map.png'), (224, 248))
-#surface.fill('#FFFFA0')
-
-pygame.draw.circle(surface, '#FFA0FF', (8, 8), 8)
-
-mask = pygame.mask.from_surface(surface)
-rects = pygame.mask.from_surface(surface).get_bounding_rects()
-
-WINDOW.blit(surface, (400, 300))
-
-
-for rect in rects:
-    pygame.draw.rect(WINDOW, '#FFFFFF', rect)
-
-WINDOW.blit(mask.to_surface(), (0, 248))
-
-while True:
-    pygame.display.flip()
+print(follow(pygame.Vector2(0, 10), pygame.Vector2(0, 0), [0, 1, 2, 3]))

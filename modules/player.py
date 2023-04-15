@@ -1,7 +1,10 @@
+from typing import Dict, List, Tuple
+
 import pygame
-from typing import Tuple, List, Dict
-from modules.entite import Entity, CASE, UNIT_SIZE
-from modules import collectable, fantome
+
+import modules.outils as utl
+from modules import collectable
+from modules.entite import CASE, Entity, clear
 from modules.graphics import Interface
 
 
@@ -9,6 +12,7 @@ class Player(Entity):
     def __init__(self, pos: pygame.Vector3, textures: Tuple[pygame.Surface, Dict[str, List[Tuple[pygame.Surface, float]]]],
                  speed: float) -> None:
         super().__init__(pos, textures)
+        self.id = 2
         self.reset_pos = pos.xy
         # mouvements
         self.mem: int = 0
@@ -41,6 +45,7 @@ class Player(Entity):
 
         futur = CASE[self.direction](self.pos.xy, self.speed, self.dt)
 
+        # si la direction indiquée convient on avance
         if (not self.collide_wall(futur) and
                 not any([enit.hard_collide for enit in
                          self.collide_with(futur)])):
@@ -50,12 +55,16 @@ class Player(Entity):
 
         else:
             futur = CASE[self.mem](self.pos.xy, self.speed, self.dt)
+            # sinon, on regarde dans la mémoire et si
+            # celle ci convient, on avance
             if (not self.collide_wall(futur) and
                     not any([enit.hard_collide for enit in
                              self.collide_with(futur)])):
                 self.pos.xy = futur
             else:
                 futur = CASE[self.mem](self.pos.xy, 10/self.dt, self.dt)
+                # si on peut tout de même avancer légèrement
+                # on avance de 1 pixel
                 if not self.collide_wall(futur):
                     self.pos.xy = futur
 
@@ -68,36 +77,33 @@ class Player(Entity):
             ...
 
         elif isinstance(entity, collectable.Super):
-            for entity in fantome.Fantome.fantomes:
-                entity.fear()
+            utl.call('powerup', {'fear': True})
 
     def interact(self):
         """gestion des intéractions avec le joueur"""
         for entity in self.collide_with():
-            if isinstance(entity, collectable.Collectable):
+            if entity.id == 0:
                 self.collect(entity)
                 entity.destroy()
                 
                 # s'il n'y a plus de pièce, on gagne
                 if len(collectable.Piece.pieces) == 0:
-                    Interface.change_interface('menu')
+                    victoire()
 
-            elif isinstance(entity, fantome.Fantome):
+            elif entity.id == 1:
+                # cas de collision avec un fantome
                 if entity.fear_state:
                     entity.reset()
 
                 elif self.health > 1:
                     self.health -= 1
-                    self.reset()
+                    utl.call('init_entities', {})
 
                 else:
-                    reset()
-                    Interface.change_interface('menu')
+                    defaite()
 
     def reset(self):
         """initialise une manche"""
-        for enit in fantome.Fantome.fantomes:
-            enit.reset()
         self.pos.xy = self.reset_pos
 
     def update(self):
@@ -113,24 +119,37 @@ class Player(Entity):
 
         self.interact()
 
+# fonction
+
+def victoire():
+    """victoire"""
+    clear()
+    Interface.change_interface('menu')
+
+
+def defaite():
+    """défaite"""
+    clear()
+    Interface.change_interface('menu')
+    
+
 # setup
-
-
-def reset():
-    """réinitialise tous les éléments du jeux"""
-    Entity.group.clear()
 
 
 def initialisation():
     """initialisation"""
+    # textures
     texture_player = pygame.transform.smoothscale(
-        pygame.image.load("ressources/textures/pacman.png"), (UNIT_SIZE, UNIT_SIZE))
+        pygame.image.load("ressources/textures/pacman.png"), (utl.UNIT_SIZE, utl.UNIT_SIZE))
 
-    texture_player_2 = pygame.Surface((UNIT_SIZE, UNIT_SIZE), pygame.SRCALPHA)
+    texture_player_2 = pygame.Surface((utl.UNIT_SIZE, utl.UNIT_SIZE), pygame.SRCALPHA)
     texture_player_2.fill(pygame.Color(255, 255, 255, 10))
     pygame.draw.circle(texture_player_2, "#FFCC00",
-                       (UNIT_SIZE // 2, UNIT_SIZE // 2), UNIT_SIZE // 2)
+                       (utl.UNIT_SIZE // 2, utl.UNIT_SIZE // 2), utl.UNIT_SIZE // 2)
 
-    Player(pygame.Vector3(UNIT_SIZE, UNIT_SIZE, 2), (texture_player, {'normal': [(texture_player, 0),
+    # entité
+    player = Player(pygame.Vector3(utl.UNIT_SIZE, utl.UNIT_SIZE, 2), (texture_player, {'normal': [(texture_player, 0),
                                                                                  (texture_player_2, 200),
                                                                                  (texture_player, 200)]}), 1.5)
+    # événements
+    utl.lie('init_entities', player.reset)

@@ -4,33 +4,34 @@ from typing import Tuple, List, Dict, Callable
 import pygame
 
 from modules.graphics import Sequence
-from modules.outils import UNIT_SIZE
-from modules import entite
+import modules.outils as utl
+from modules.entite import Entity, CASE
 
 
-class Fantome(entite.Entity):
+class Fantome(Entity):
     """gestion des fantomes"""
     fantomes: List['Fantome'] = []
 
     def __init__(self, position: pygame.Vector3,
                  textures: Tuple[pygame.Surface, Dict[str, List[Tuple[pygame.Surface, float]]]],
-                 comportement: Callable[[List[int]], int]) -> None:
+                 comportement_infos: Tuple[Callable[['Fantome', List[int]], int], int]) -> None:
         super().__init__(position, textures)
+        self.id = 1
         # mouvements
         self.start_pos = position.xy
-        self.direction: int = 0  # a modifier potentiellement
-        self.direction_new: int = self.direction
-        self.speed = 1.4
+        self.direction: int = 1
+        self.memoire: int = self.direction
+        self.speed = 1.2
 
-        self.comportement = comportement
+        self.comportement, periode = comportement_infos
 
         self.time = 0
 
         self.fear_state = False
-        self.fear_seq = Sequence([((self.set_fear, [False]), 4000)], loop=True)
+        self.fear_seq = Sequence([((self.set_fear, [False]), 4000)])
 
         self.seq = Sequence(
-            [((self.change_direction, []), 5000)], loop=True)
+            [((self.desire_direction, []), periode)], loop=True)
         self.seq.start()
 
         Fantome.fantomes.append(self)
@@ -41,68 +42,74 @@ class Fantome(entite.Entity):
         self.fear_state = False
         self.animation.reset_anim()
 
-    def fear(self):
-        """active la peur chez le fantome"""
-        self.animation.start_anim('fear')
-        self.fear_seq.start()
-        self.fear_state = True
-
     def calc_directions(self):
         """calcule les différentes directions possibles"""
-        return [k for k in range(4) if not self.collide_wall(entite.CASE[k](self.pos.xy, self.speed, self.dt))]
+        return [k for k in range(4) if not self.collide_wall(CASE[k](self.pos.xy, self.speed, self.dt))]
 
-    def change_direction(self):
+    def desire_direction(self):
         """change le fantome de direction"""
-        directions = self.calc_directions()
-        if directions != []:
-            self.direction_new = self.comportement(directions)
-
-    def move_direction(self, direction: int):
-        """bouge dans une direction"""
-        futur = entite.CASE[direction](self.pos.xy, self.speed, self.dt)
-
-        if not self.collide_wall(futur):
-            self.pos.xy = futur
-            return True
-        return False
+        self.direction = self.comportement(self, [0, 1, 2, 3])
+        print(self.direction)
 
     def contourne_mur(self):
         """fait changer le fantome de direction lorsqu'il rencontre un mur"""
-        self.change_direction()
-        self.direction = self.direction_new
-        self.move_direction(self.direction)
+        directions = self.calc_directions()
+        if directions != []:
+            self.direction = self.comportement(self, directions)
+            self.memoire = self.direction
+        else:
+            self.direction = -1
+        self.pos.xy = CASE[self.direction](self.pos.xy, self.speed, self.dt)
 
     def controle(self) -> None:
         """gestion du déplacement d'une entité"""
         if self.dt > 50:
             return
+
+        # on teste d'abord la direction désirée
+        futur = CASE[self.direction](self.pos.xy, self.speed, self.dt)
+        if not self.collide_wall(futur):
+            self.pos.xy = futur
+            self.memoire = self.direction
+            return
+        
+        new_direction = -1
         directions = self.calc_directions()
 
         # on regarde si le fantome se situe sur une intersection
         if len(directions) >= 2:
             # on fait en sorte que le fantome ne revienne pas sur ses pas
-            if (self.direction + 2) % 4 in directions:
-                directions.remove((self.direction + 2) % 4)
-            self.direction_new = self.comportement(directions)
-            self.direction_cooldown = 10
-
-        # s'il y a une nouvelle direction, on la met à jour
-        if self.direction_new != -1:
-            self.move_direction(self.direction_new)
-            self.direction = self.direction_new
-            self.direction_new = -1
+            if (self.memoire + 2) % 4 in directions:
+                directions.remove((self.memoire + 2) % 4)
+            new_direction = self.comportement(self, directions)
+        elif len(directions) > 0:
+            new_direction = directions[0]
         else:
-            # sinon, on continue dans la même direction
-            res = self.move_direction(self.direction)
+            new_direction = -1
+            futur = CASE[self.memoire](self.pos.xy, 10/self.dt, self.dt)
+            # si on peut tout de même avancer légèrement
+            # on avance de 1 pixel
+            if not self.collide_wall(futur):
+                self.pos.xy = futur
 
-            # si on rencontre un mur
-            # on change de direction
-            if not res:
-                self.contourne_mur()
+        # s'il y a une nouvelle direction, on met à jour la position
+        if new_direction != -1:
+            futur = CASE[new_direction](self.pos.xy, self.speed, self.dt)
+            self.pos.xy = futur
+
+            self.memoire = new_direction
 
     def set_fear(self, fear: bool):
         """renvoie vrai si le fantome est en état de peur"""
         self.fear_state = fear
+
+        if self.fear_state:
+            self.animation.start_anim('fear')
+            self.fear_seq.start()
+
+    def destroy(self) -> None:
+        Fantome.fantomes.remove(self)
+        super().destroy()
 
     def update(self):
         """mise à jour"""
@@ -118,45 +125,71 @@ class Fantome(entite.Entity):
             self.animation.start_anim('fear_blink')
 
 
-class Porte(entite.Entity):
+class Porte(Entity):
     """gestion des portes"""
 
     def __init__(self, position: pygame.Vector3, width: int) -> None:
-        texture = pygame.Surface((width, UNIT_SIZE))
+        texture = pygame.Surface((width, utl.UNIT_SIZE))
         pygame.draw.rect(texture, (250, 175, 90),
-                         pygame.rect.Rect(0, (UNIT_SIZE - 4) // 2, width, 4))
+                         pygame.rect.Rect(0, (utl.UNIT_SIZE - 4) // 2, width, 4))
         super().__init__(position, (texture, {}))
         self.hard_collide = True
+        self.id = 3
+
+# fonctions
+
+def find_joueur():
+    """trouve le joueur"""
+    return [enit for enit in Entity.group if enit.id == 2][0]
 
 # comportements
 
 
-def aleatoire(directions: List[int]):
+def aleatoire(fantome: Fantome, directions: List[int]):
+    """
+    renvoie une direction au
+    hazard parmi celles proposées
+    """
+    choix = random.choice(directions)
+    return choix
+
+
+def follow(fantome: Fantome, directions: List[int]):
     """
     renvoie une direction au
     choix parmi celles proposées
     """
-    choix = random.choice(directions)
-    return choix
+    player = find_joueur()
+
+    direct = (player.pos.xy - fantome.pos.xy).normalize()
+    produits_scalaires = [((direction % 2 == 0) * (-(direction // 2) * 2 + 1) * direct.x +
+      (direction % 2 == 1) * ((direction // 2) * 2 - 1) * direct.y) for direction in directions]
+    return directions[produits_scalaires.index(max(produits_scalaires))]
 
 
 # setup
 
 def initialisation():
     """initialisation des fantomes"""
+    # textures
     texture_fantome = pygame.transform.scale(
-        pygame.image.load("ressources/textures/blinky.png"), (UNIT_SIZE, UNIT_SIZE))
+        pygame.image.load("ressources/textures/blinky.png"), (utl.UNIT_SIZE, utl.UNIT_SIZE))
 
     texture_fantome_fear = pygame.transform.scale(
-        pygame.image.load("ressources/textures/stun.png"), (UNIT_SIZE, UNIT_SIZE))
+        pygame.image.load("ressources/textures/stun.png"), (utl.UNIT_SIZE, utl.UNIT_SIZE))
     texture_fantome_fear_2 = pygame.transform.scale(
-        pygame.image.load("ressources/textures/stun2.png"), (UNIT_SIZE, UNIT_SIZE))
+        pygame.image.load("ressources/textures/stun2.png"), (utl.UNIT_SIZE, utl.UNIT_SIZE))
 
-    Fantome(pygame.Vector3(196, 225, 2), (texture_fantome, {'fear': [(texture_fantome_fear, 0),
+    # entités
+
+    blinky = Fantome(pygame.Vector3(196, 225, 2), (texture_fantome, {'fear': [(texture_fantome_fear, 0),
                                                                      (texture_fantome_fear, 3000)],
                                                             'fear_blink': [(texture_fantome_fear, 0),
                                                                            (texture_fantome_fear_2, 200),
                                                                            (texture_fantome, 200)]}),
-            aleatoire)
-
+            (follow, 1000))
     Porte(pygame.Vector3(208, 196, 1), 32)
+
+    # événements
+    utl.lie('init_entities', blinky.reset)
+    utl.lie('powerup', blinky.set_fear)

@@ -5,6 +5,7 @@ from modules.graphics import Interface, Frame, Bouton, POLICE, RelativePos
 from modules import collectable, entite, plateau
 import modules.player as player
 import modules.fantome as fantome
+import modules.outils as utl
 
 pygame.init()
 
@@ -22,6 +23,8 @@ def play():
 
     player.initialisation()
     fantome.initialisation()
+
+    utl.call('init_entities', {})
 
     Interface.change_interface('jeux')
 

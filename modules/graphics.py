@@ -120,7 +120,8 @@ class Interface:
     @classmethod
     def change_interface(cls, interface_nom: str):
         """change l'interface actuelle"""
-        cls.current_interface = cls.interfaces[interface_nom]
+        if interface_nom in cls.interfaces:
+            cls.current_interface = cls.interfaces[interface_nom]
 
 
 class Element:
@@ -146,7 +147,7 @@ class Element:
         else:
             Interface.add_element_to(self, interface_nom)
 
-    def delink(self):
+    def delie(self):
         """délie l'élément"""
         self.interface.remove_element(self)
 

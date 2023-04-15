@@ -1,5 +1,5 @@
 """module outils"""
-from typing import List
+from typing import List, Callable, Dict, Any
 import pygame
 
 # constantes
@@ -85,3 +85,40 @@ def forme_mask(surface: pygame.Surface, size: int):
             if surf_mask.overlap(mask, (size * coordx, size * coordy)) is not None:
                 forme_surf_mask.draw(mask, (size * coordx, size * coordy))
     return forme_surf_mask
+
+
+# système observeur-action
+
+evenements: Dict[str, List[Callable[..., None]]] = {}
+
+def lie(nom: str, fnct: Callable[..., None]):
+    """lie une fonction à un événement"""
+    if nom in evenements:
+        evenements[nom].append(fnct)
+    else:
+        evenements[nom] = [fnct]
+
+
+def delie(nom: str, fnct: Callable[..., None]):
+    """lie une fonction à un événement"""
+    if nom in evenements and fnct in evenements[nom]:
+        evenements[nom].remove(fnct)
+
+
+def call(nom: str, data: Dict[str, Any]):
+    if not nom in evenements:
+        return
+    
+    for fnct in evenements[nom]:
+        fnct(**data)
+
+def clear(noms: str | List[str]):
+    """supprime tous les liens donnés"""
+    if isinstance(noms, str):
+        if noms in evenements:
+            del evenements[noms]
+        return
+
+    for nom in noms:
+        if nom in evenements:
+            del evenements[nom]
