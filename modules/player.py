@@ -71,10 +71,10 @@ class Player(Entity):
     def collect(self, entity: Entity):
         """gestion de la collecte des collectables"""
         if isinstance(entity, collectable.Piece):
-            self.points += 1
+            utl.call('add_point', {'point': 1})
 
         elif isinstance(entity, collectable.Pomme):
-            ...
+            utl.call('add_point', {'point': 10})
 
         elif isinstance(entity, collectable.Super):
             utl.call('powerup', {'fear': True})

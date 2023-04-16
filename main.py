@@ -6,6 +6,7 @@ from modules import collectable, entite, plateau
 import modules.player as player
 import modules.fantome as fantome
 import modules.outils as utl
+from modules.overlays import Compteur
 
 pygame.init()
 
@@ -35,6 +36,11 @@ def initialise():
     Interface('jeux')
     Frame('plateau', interface_plateau, pygame.Surface((448, 496)),
           RelativePos(0.5, 0.5, 0), 'jeux')
+    
+    # compteur de points
+    compteur = Compteur(RelativePos(0.5, 0, 1, aligne='x'), 'jeux')
+    utl.lie('add_point', compteur.incremente)
+    utl.lie('vide_point', compteur.vide)
     
     # création du menu
     interface_menu = Interface('menu')

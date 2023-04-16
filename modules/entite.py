@@ -59,20 +59,6 @@ class Entity:
 
         Entity.group.append(self)
 
-    @classmethod
-    def collide_with_point(cls, point: pygame.Vector2, ignore: List['Entity'] = []) -> List['Entity']:
-        """return a liste containing the sprites colliding with the point"""
-        for enit in ignore:
-            Entity.group.remove(enit)
-
-        collide_ls: List['Entity'] = [
-            enit for enit in Entity.group if enit.animation.rect.collidepoint(point)]
-
-        for enit in ignore:
-            Entity.group.append(enit)
-
-        return collide_ls
-
     def collide_with(self, point: pygame.Vector2 | None = None) -> List['Entity']:
         """return a list containing the sprites colliding with this one"""
         Entity.group.remove(self)
@@ -92,10 +78,11 @@ class Entity:
 
     def collide_wall(self, pos: pygame.Vector2):
         """Check if the entity collide with walls"""
-        # (-pos.x, -pos.y) is used because the top left corner of self.mask
-        # is consider to be (0, 0). The wall's mask is therefore shift to the entity
-        # Thus, it has to be reshift to (0, 0) world coordinates
-        return Entity.plateau.element.mask.overlap(self.animation.mask, (pos.x + utl.UNIT_SIZE, pos.y + utl.UNIT_SIZE)) is not None
+        # on utilise (-pos.x, -pos.y) car le coin supérieur gauche du masque
+        # est considéré comme étant (0, 0). Le masque des murs est par conséquent décalé.
+        # on doit donc le recentré
+        return Entity.plateau.element.mask.overlap(self.animation.mask, (pos.x + utl.UNIT_SIZE,
+                                                                         pos.y + utl.UNIT_SIZE)) is not None
 
     def destroy(self) -> None:
         """détruit l'entité"""
@@ -110,3 +97,4 @@ def clear():
     while len(Entity.group) > 0:
         Entity.group[0].destroy()
     utl.clear(['init_entities', 'powerup'])
+    utl.call('vide_point', {})

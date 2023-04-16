@@ -58,7 +58,7 @@ class Sequence:
         """met à jour la séquence"""
         if self.pause_seq is not None and self.pause_seq.is_running:
             self.pause_seq.update()
-            return
+            return False
 
         if not self.is_running or (self.times[self.pointer] >
                                    pygame.time.get_ticks() - self.sqc_timer):
@@ -114,10 +114,10 @@ class Interface:
 
     def update(self):
         for elm in self.elements:
-            if hasattr(elm, 'update'):
-                elm.update()
             if hasattr(elm, 'objet') and hasattr(elm.objet, 'update'):
                 elm.objet.update()
+            if hasattr(elm, 'update'):
+                elm.update()
 
     def render(self):
         """méthode d'affichage"""
@@ -143,7 +143,7 @@ class Element:
     """
 
     def __init__(self, objet: Any, surface: pygame.Surface, rectangle: pygame.Rect,
-                 interface_nom: str | None = None, need_forming: bool = True) -> None:
+                 interface_nom: str | None = None, need_forming: bool = False) -> None:
         self.need_forming = need_forming
         self.surface = surface
         self.mask = (forme_mask(surface, UNIT_SIZE)
@@ -151,7 +151,7 @@ class Element:
         self.rect = rectangle
         self.objet = objet
         self.backup_rotation = 0
-        self.pos: pygame.Vector3 = self.objet.pos
+        self.pos: pygame.Vector3 | RelativePos = self.objet.pos
         self.interface: Interface
 
         if interface_nom is None:
@@ -159,20 +159,28 @@ class Element:
         else:
             Interface.add_element_to(self, interface_nom)
 
+        self.update()
+
     def delie(self):
         """délie l'élément"""
         self.interface.remove_element(self)
 
-    def ancre(self, ancre: str = 'topleft'):
+    def ancre(self):
         """ancre le rectangle à la bonne position"""
-        # cas où l'élément n'est pas encore binder
-        if not hasattr(self, 'objet'):
-            return
+        # cas où l'élément n'est pas encore lié
+        self.pos: pygame.Vector3 | RelativePos = self.objet.pos
+        ancre = 'topleft'
 
-        self.pos: pygame.Vector3 = self.objet.pos
+        if isinstance(self.pos, RelativePos):
+            ancre = self.pos.aligne
+
         match ancre:
             case 'centre':
                 self.rect.center = vect2_to_tuple(self.pos.xy)
+            case 'x':
+                self.rect.centerx = vect2_to_tuple(self.pos.xy)[0]
+            case 'y':
+                self.rect.centery = vect2_to_tuple(self.pos.xy)[1]
             case _:
                 self.rect.topleft = vect2_to_tuple(self.pos.xy)
 
@@ -180,9 +188,7 @@ class Element:
         """methode de mise à jour"""
         if isinstance(self.pos, RelativePos):
             self.pos.update()
-            self.ancre('centre')
-        else:
-            self.ancre()
+        self.ancre()
 
         if hasattr(self, 'objet') and hasattr(self.objet, 'rotation'):
             # en degrés
@@ -234,12 +240,13 @@ class RelativePos:
     """
     window: pygame.Surface
 
-    def __init__(self, relx: float, rely: float, posz: int) -> None:
+    def __init__(self, relx: float, rely: float, posz: int, aligne='centre') -> None:
         self.relx, self.rely = relx, rely
         self.x: float
         self.y: float
         self.xy: pygame.Vector2
         self.z = posz
+        self.aligne = aligne
         self.update()
 
     def update(self):
@@ -332,3 +339,22 @@ class Bouton:
         """active lors du clique"""
         if self.element.rect.collidepoint(event.pos) and self.click == event.button:
             self.fnct()
+
+
+class Texte:
+    """gestion des textes"""
+
+    def __init__(self, pos: pygame.Vector3 | RelativePos, texte: str = "", couleur: str = "#FFFFFF",
+                 background_couleur: str = "#000000", interface_nom: str | None= None) -> None:
+        self.pos = pos
+        self.texte = texte
+        self.couleur = couleur
+        self.background_couleur = background_couleur
+        surface = POLICE.render(self.texte, True, self.couleur, self.background_couleur)
+        self.element = Element(self, surface, surface.get_rect(), interface_nom)
+
+    def update(self):
+        """mise à jour"""
+        surface = POLICE.render(self.texte, True, self.couleur, self.background_couleur)
+        self.element.surface = surface
+        self.element.rect = surface.get_rect()

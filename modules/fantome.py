@@ -52,7 +52,6 @@ class Fantome(Entity):
 
     def desire_direction(self):
         """change le fantome de direction"""
-        print('in')
         self.direction = self.comportement(self, [0, 1, 2, 3])
 
     def contourne_mur(self):
