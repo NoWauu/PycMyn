@@ -1,7 +1,7 @@
 """module principal"""
 from typing import List
 import pygame
-from modules.graphics import Interface, Frame, Bouton, POLICE, RelativePos
+from modules.graphics import Interface, Frame, Bouton, POLICE, RelativePos, Texte
 from modules import collectable, entite, plateau
 import modules.player as player
 import modules.fantome as fantome
@@ -31,17 +31,6 @@ def play():
 
 def initialise():
     """fonction d'initialisation"""
-    # définition de la zone de jeux
-    interface_plateau = Interface('plateau')
-    Interface('jeux')
-    Frame('plateau', interface_plateau, pygame.Surface((448, 496)),
-          RelativePos(0.5, 0.5, 0), 'jeux')
-    
-    # compteur de points
-    compteur = Compteur(RelativePos(0.5, 0, 1, aligne='x'), 'jeux')
-    utl.lie('add_point', compteur.incremente)
-    utl.lie('vide_point', compteur.vide)
-    
     # création du menu
     interface_menu = Interface('menu')
 
@@ -49,6 +38,19 @@ def initialise():
            play, 'menu')
 
     Interface.current_interface = interface_menu
+
+    # définition de la zone de jeux
+    interface_plateau = Interface('plateau')
+    Interface('jeux')
+    Frame('plateau', interface_plateau, pygame.Surface((448, 496)),
+          RelativePos(0.5, 0.5, 0), 'jeux')
+    texte_niveau = Texte(RelativePos(0.5, 1, 1, aligne='bottom'), f'niveau: {entite.Entity.niveau}', interface_nom='jeux')
+    utl.lie('inc_niveau', lambda niveau: setattr(texte_niveau, 'texte', f'niveau: {niveau + 1}'))
+    
+    # compteur de points
+    compteur = Compteur(RelativePos(0.5, 0, 1, aligne='top'), 'jeux')
+    utl.lie('add_point', compteur.incremente)
+    utl.lie('vide_point', compteur.vide)
 
     # jeux
     plt = plateau.Plateau()

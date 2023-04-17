@@ -177,10 +177,14 @@ class Element:
         match ancre:
             case 'centre':
                 self.rect.center = vect2_to_tuple(self.pos.xy)
-            case 'x':
-                self.rect.centerx = vect2_to_tuple(self.pos.xy)[0]
-            case 'y':
-                self.rect.centery = vect2_to_tuple(self.pos.xy)[1]
+            case 'top':
+                self.rect.centerx, self.rect.top = vect2_to_tuple(self.pos.xy)
+            case 'bottom':
+                self.rect.centerx, self.rect.bottom = vect2_to_tuple(self.pos.xy)
+            case 'left':
+                self.rect.left, self.rect.centery = vect2_to_tuple(self.pos.xy)
+            case 'right':
+                self.rect.right, self.rect.centery = vect2_to_tuple(self.pos.xy)
             case _:
                 self.rect.topleft = vect2_to_tuple(self.pos.xy)
 
@@ -240,7 +244,7 @@ class RelativePos:
     """
     window: pygame.Surface
 
-    def __init__(self, relx: float, rely: float, posz: int, aligne='centre') -> None:
+    def __init__(self, relx: float, rely: float, posz: int, aligne: str = 'centre') -> None:
         self.relx, self.rely = relx, rely
         self.x: float
         self.y: float
