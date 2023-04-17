@@ -10,6 +10,7 @@ from modules.entite import Entity, CASE
 
 class Fantome(Entity):
     """gestion des fantomes"""
+
     fantomes: List['Fantome'] = []
 
     def __init__(self, position: pygame.Vector3,
@@ -21,18 +22,23 @@ class Fantome(Entity):
         self.start_pos = position.xy
         self.direction: int = 1
         self.memoire: int = self.direction
-        self.speed = 1.2
+        self.base_speed = 1.2
+        self.speed = self.base_speed * \
+            float(utl.TABLE[super().niveau if super().niveau <=
+                  20 else 21]['vitesse_fantome'])
 
         self.comportement, periode = comportement_infos
 
         self.time = 0
 
         self.fear_state = False
-        self.fear_seq = Sequence([((self.set_fear, [False]), 4000)])
+        self.fear_seq = Sequence([((self.set_fear, [False]),
+                                   int(utl.TABLE[Fantome.niveau if
+                                                 Fantome.niveau <= 20 else 21]['fright_time']) * 1000)])
 
         self.seq = Sequence(
             [((self.desire_direction, []), periode)], loop=True)
-        
+
         # on met un delai sur le lancement de la séquence
         self.seq.start()
 
@@ -75,9 +81,10 @@ class Fantome(Entity):
             self.pos.xy = futur
             self.memoire = self.direction
             return
-        
+
         new_direction = -1
         directions = self.calc_directions()
+        print(directions)
 
         # on regarde si le fantome se situe sur une intersection
         if len(directions) >= 2:
@@ -100,8 +107,14 @@ class Fantome(Entity):
         self.fear_state = fear
 
         if self.fear_state:
+            self.speed = float(utl.TABLE[super().niveau if super(
+            ).niveau <= 20 else 21]['fright_ghost_vitesse']) * self.base_speed
             self.animation.start_anim('fear')
             self.fear_seq.start()
+        else:
+            self.speed = self.base_speed * \
+                float(utl.TABLE[super().niveau if super(
+                ).niveau <= 20 else 21]['vitesse_fantome'])
 
     def destroy(self) -> None:
         Fantome.fantomes.remove(self)
@@ -134,6 +147,7 @@ class Porte(Entity):
 
 # fonctions
 
+
 def find_joueur():
     """trouve le joueur"""
     return [enit for enit in Entity.group if enit.id == 2][0]
@@ -159,11 +173,12 @@ def follow(fantome: Fantome, directions: List[int]):
 
     direct = (player.pos.xy - fantome.pos.xy).normalize()
     produits_scalaires = [((direction % 2 == 0) * (-(direction // 2) * 2 + 1) * direct.x +
-      (direction % 2 == 1) * ((direction // 2) * 2 - 1) * direct.y) for direction in directions]
+                           (direction % 2 == 1) * ((direction // 2) * 2 - 1) * direct.y) for direction in directions]
     return directions[produits_scalaires.index(max(produits_scalaires))]
 
 
 # setup
+
 
 def initialisation():
     """initialisation des fantomes"""
@@ -180,18 +195,18 @@ def initialisation():
 
     # entités
 
-    blinky = Fantome(pygame.Vector3(196, 225, 2), (texture_blinky, {'fear': [(texture_fantome_fear, 0),
-                                                                     (texture_fantome_fear, 3000)],
-                                                            'fear_blink': [(texture_fantome_fear, 0),
-                                                                           (texture_fantome_fear_2, 200),
-                                                                           (texture_blinky, 200)]}),
-            (aleatoire, 5000))
-    inky = Fantome(pygame.Vector3(196, 225, 2), (texture_inky, {'fear': [(texture_fantome_fear, 0),
-                                                                     (texture_fantome_fear, 3000)],
-                                                            'fear_blink': [(texture_fantome_fear, 0),
-                                                                           (texture_fantome_fear_2, 200),
-                                                                           (texture_inky, 200)]}),
-            (follow, 1000))
+    blinky = Fantome(pygame.Vector3(192, 224, 2), (texture_blinky, {'fear': [(texture_fantome_fear, 0),
+                                                                             (texture_fantome_fear, 3000)],
+                                                                    'fear_blink': [(texture_fantome_fear, 0),
+                                                                                   (texture_fantome_fear_2, 200),
+                                                                                   (texture_blinky, 200)]}),
+                     (aleatoire, 5000))
+    inky = Fantome(pygame.Vector3(192, 224, 2), (texture_inky, {'fear': [(texture_fantome_fear, 0),
+                                                                         (texture_fantome_fear, 3000)],
+                                                                'fear_blink': [(texture_fantome_fear, 0),
+                                                                               (texture_fantome_fear_2, 200),
+                                                                               (texture_inky, 200)]}),
+                   (follow, 1000))
     Porte(pygame.Vector3(208, 196, 1), 32)
 
     # événements

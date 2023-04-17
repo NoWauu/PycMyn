@@ -54,6 +54,9 @@ def initialise():
     plt = plateau.Plateau()
     entite.Entity.plateau = plt
 
+    #
+    utl.lie('inc_niveau', entite.Entity.set_niveau)
+
 
 def handle_event(events: List[pygame.event.Event]) -> bool:
     """gestion des événements"""

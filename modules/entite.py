@@ -47,6 +47,8 @@ class Entity:
     plateau: plateau.Plateau
     group: List['Entity'] = []
 
+    niveau = 0
+
     def __init__(self, pos: pygame.Vector3, anim_infos: Tuple[pygame.Surface,
                                                               Dict[str, List[Tuple[pygame.Surface, float]]]]) -> None:
         self.pos = pos
@@ -90,6 +92,11 @@ class Entity:
         Entity.group.remove(self)
         del self.animation
         del self
+
+    @classmethod
+    def set_niveau(cls, niveau: int):
+        """change le niveau"""
+        cls.niveau = niveau
 
 
 def clear():

@@ -9,6 +9,7 @@ from modules.graphics import Interface
 
 
 class Player(Entity):
+
     def __init__(self, pos: pygame.Vector3, textures: Tuple[pygame.Surface, Dict[str, List[Tuple[pygame.Surface, float]]]],
                  speed: float) -> None:
         super().__init__(pos, textures)
@@ -17,7 +18,8 @@ class Player(Entity):
         # mouvements
         self.mem: int = 0
         self.direction: int = -1
-        self.speed = speed
+        self.base_speed = speed
+        self.speed = self.base_speed * float(utl.TABLE[super().niveau if super().niveau <= 20 else 21]['vitesse_pacman'])
 
         self.time_since_last_frame = pygame.time.get_ticks()
 
@@ -74,7 +76,7 @@ class Player(Entity):
             utl.call('add_point', {'point': 1})
 
         elif isinstance(entity, collectable.Pomme):
-            utl.call('add_point', {'point': 10})
+            utl.call('add_point', {'point': int(utl.TABLE[super().niveau if super().niveau <= 20 else 21]['points_bonus'])})
 
         elif isinstance(entity, collectable.Super):
             utl.call('powerup', {'fear': True})
@@ -124,12 +126,14 @@ class Player(Entity):
 def victoire():
     """victoire"""
     clear()
+    utl.call('inc_niveau', {'niveau': Entity.niveau + 1})
     Interface.change_interface('menu')
 
 
 def defaite():
     """défaite"""
     clear()
+    utl.call('inc_niveau', {'niveau': 0})
     Interface.change_interface('menu')
     
 

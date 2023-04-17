@@ -1,10 +1,14 @@
 """module outils"""
+import csv
 from typing import List, Callable, Dict, Any
 import pygame
 
 # constantes
 
 UNIT_SIZE = 16
+
+with open('ressources/niveaux.csv','r') as file:
+    TABLE = list(csv.DictReader(file, delimiter=';'))
 
 # fonctions
 
