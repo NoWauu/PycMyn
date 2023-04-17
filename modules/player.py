@@ -7,6 +7,8 @@ from modules import collectable
 from modules.entite import CASE, Entity, clear
 from modules.graphics import Interface
 
+pygame.init()
+
 
 class Player(Entity):
 
@@ -157,7 +159,7 @@ def initialisation():
     """initialisation"""
     # textures
     texture_player = pygame.transform.smoothscale(
-        pygame.image.load("ressources/textures/pacman.png"), (utl.UNIT_SIZE, utl.UNIT_SIZE))
+        pygame.image.load("ressources/textures/pacman.png").convert_alpha(), (utl.UNIT_SIZE, utl.UNIT_SIZE))
 
     texture_player_2 = pygame.Surface(
         (utl.UNIT_SIZE, utl.UNIT_SIZE), pygame.SRCALPHA)

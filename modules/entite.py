@@ -7,6 +7,8 @@ from modules.graphics import AnimElement, Frame, vect2_to_tuple
 from modules import plateau
 import modules.outils as utl
 
+pygame.init()
+
 # fonctions de déplacement
 
 

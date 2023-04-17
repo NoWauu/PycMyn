@@ -7,6 +7,7 @@ import pygame
 from modules.entite import Entity
 from modules.outils import UNIT_SIZE, forme_mask
 
+pygame.init()
 
 class Collectable(Entity):
     """classe de gestion des collectables"""
@@ -106,7 +107,7 @@ texture_piece = pygame.Surface((UNIT_SIZE, UNIT_SIZE), pygame.SRCALPHA)
 pygame.draw.circle(texture_piece, (250, 198, 53), (UNIT_SIZE // 2, UNIT_SIZE // 2), 3)
 
 texture_pomme = pygame.transform.scale(
-    pygame.image.load("ressources/textures/pomme.png"), (UNIT_SIZE, UNIT_SIZE))
+    pygame.image.load("ressources/textures/pomme.png").convert_alpha(), (UNIT_SIZE, UNIT_SIZE))
 
 texture_super = pygame.Surface((UNIT_SIZE, UNIT_SIZE), pygame.SRCALPHA)
 pygame.draw.circle(texture_super, (255, 255, 255), (UNIT_SIZE // 2, UNIT_SIZE // 2), 6)

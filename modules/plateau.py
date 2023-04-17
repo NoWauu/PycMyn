@@ -4,6 +4,7 @@ import pygame
 from modules.graphics import StaticElement
 from modules.outils import extend_mask, forme_mask
 
+pygame.init()
 
 class Plateau:
     """classe de gestion du plateau"""

@@ -7,6 +7,8 @@ from modules.graphics import Sequence
 import modules.outils as utl
 from modules.entite import Entity, CASE
 
+pygame.init()
+
 
 class Fantome(Entity):
     """gestion des fantomes"""
@@ -107,8 +109,9 @@ class Fantome(Entity):
         self.fear_state = fear
 
         if self.fear_state:
-            self.speed = float(utl.TABLE[super().niveau if super(
-            ).niveau <= 20 else 21]['fright_ghost_vitesse']) * self.base_speed
+            self.speed = float(utl.TABLE[super().niveau
+                                         if super().niveau <= 20 else 21]['fright_ghost_vitesse']) * \
+                self.base_speed
             self.animation.start_anim('fear')
             self.fear_seq.start()
         else:
@@ -184,14 +187,14 @@ def initialisation():
     """initialisation des fantomes"""
     # textures
     texture_blinky = pygame.transform.scale(
-        pygame.image.load("ressources/textures/blinky.png"), (utl.UNIT_SIZE, utl.UNIT_SIZE))
+        pygame.image.load("ressources/textures/blinky.png").convert_alpha(), (utl.UNIT_SIZE, utl.UNIT_SIZE))
     texture_inky = pygame.transform.scale(
-        pygame.image.load("ressources/textures/inky.png"), (utl.UNIT_SIZE, utl.UNIT_SIZE))
+        pygame.image.load("ressources/textures/inky.png").convert_alpha(), (utl.UNIT_SIZE, utl.UNIT_SIZE))
 
     texture_fantome_fear = pygame.transform.scale(
-        pygame.image.load("ressources/textures/stun.png"), (utl.UNIT_SIZE, utl.UNIT_SIZE))
+        pygame.image.load("ressources/textures/stun.png").convert_alpha(), (utl.UNIT_SIZE, utl.UNIT_SIZE))
     texture_fantome_fear_2 = pygame.transform.scale(
-        pygame.image.load("ressources/textures/stun2.png"), (utl.UNIT_SIZE, utl.UNIT_SIZE))
+        pygame.image.load("ressources/textures/stun2.png").convert_alpha(), (utl.UNIT_SIZE, utl.UNIT_SIZE))
 
     # entités
 

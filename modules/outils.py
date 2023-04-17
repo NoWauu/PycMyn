@@ -3,8 +3,11 @@ import csv
 from typing import List, Callable, Dict, Any
 import pygame
 
+pygame.init()
+
 # constantes
 
+WINDOW = pygame.display.set_mode((600, 600), pygame.RESIZABLE)
 UNIT_SIZE = 16
 
 with open('ressources/niveaux.csv','r') as file:

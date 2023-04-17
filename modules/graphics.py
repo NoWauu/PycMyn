@@ -3,8 +3,8 @@ from typing import List, Any, Tuple, Dict, Callable
 import pygame
 
 from modules.outils import dichotomie, forme_mask, UNIT_SIZE
-pygame.init()
 
+pygame.init()
 
 # constantes
 

@@ -1,19 +1,21 @@
 """module principal"""
 from typing import List
+
 import pygame
-from modules.graphics import Interface, Frame, Bouton, POLICE, RelativePos, Texte
-from modules import collectable, entite, plateau
-import modules.player as player
+
 import modules.fantome as fantome
 import modules.outils as utl
+import modules.player as player
+from modules import collectable, entite, plateau
+from modules.graphics import (POLICE, Bouton, Frame, Interface, RelativePos,
+                              Texte)
 from modules.overlays import Compteur
 
 pygame.init()
 
 # constantes
 
-WINDOW = pygame.display.set_mode((600, 600), pygame.RESIZABLE)
-RelativePos.window = WINDOW
+RelativePos.window = utl.WINDOW
 
 # fonctions principales
 
@@ -77,9 +79,9 @@ def handle_event(events: List[pygame.event.Event]) -> bool:
 
 def update():
     """fonction de mis à jour"""
-    WINDOW.fill('#000000')
+    utl.WINDOW.fill('#000000')
     Interface.current_interface.update()
-    WINDOW.blits(Interface.current_interface.render())
+    utl.WINDOW.blits(Interface.current_interface.render())
     pygame.display.flip()
 
 
