@@ -19,7 +19,9 @@ class Player(Entity):
         self.mem: int = 0
         self.direction: int = -1
         self.base_speed = speed
-        self.speed = self.base_speed * float(utl.TABLE[super().niveau if super().niveau <= 20 else 21]['vitesse_pacman'])
+        self.speed = self.base_speed * \
+            float(utl.TABLE[super().niveau if super().niveau <=
+                  20 else 21]['vitesse_pacman'])
 
         self.time_since_last_frame = pygame.time.get_ticks()
 
@@ -76,10 +78,20 @@ class Player(Entity):
             utl.call('add_point', {'point': 1})
 
         elif isinstance(entity, collectable.Pomme):
-            utl.call('add_point', {'point': int(utl.TABLE[super().niveau if super().niveau <= 20 else 21]['points_bonus'])})
+            utl.call('add_point', {'point': int(utl.TABLE[super().niveau if super().niveau
+                                                          <= 20 else 21]['points_bonus'])})
 
         elif isinstance(entity, collectable.Super):
             utl.call('powerup', {'fear': True})
+
+    def change_speed(self, fear: bool):
+        """change le vitesse"""
+        if fear:
+            self.speed = self.base_speed * float(utl.TABLE[super().niveau if super().niveau
+                                                           <= 20 else 21]["super_pacman_vitesse"])
+        else:
+            self.speed = self.base_speed * float(utl.TABLE[super().niveau if super().niveau
+                                                           <= 20 else 21]["vitesse_pacman"])
 
     def interact(self):
         """gestion des intéractions avec le joueur"""
@@ -87,7 +99,7 @@ class Player(Entity):
             if entity.id == 0:
                 self.collect(entity)
                 entity.destroy()
-                
+
                 # s'il n'y a plus de pièce, on gagne
                 if len(collectable.Piece.pieces) == 0:
                     victoire()
@@ -123,6 +135,7 @@ class Player(Entity):
 
 # fonction
 
+
 def victoire():
     """victoire"""
     clear()
@@ -135,7 +148,7 @@ def defaite():
     clear()
     utl.call('inc_niveau', {'niveau': 0})
     Interface.change_interface('menu')
-    
+
 
 # setup
 
@@ -146,14 +159,16 @@ def initialisation():
     texture_player = pygame.transform.smoothscale(
         pygame.image.load("ressources/textures/pacman.png"), (utl.UNIT_SIZE, utl.UNIT_SIZE))
 
-    texture_player_2 = pygame.Surface((utl.UNIT_SIZE, utl.UNIT_SIZE), pygame.SRCALPHA)
+    texture_player_2 = pygame.Surface(
+        (utl.UNIT_SIZE, utl.UNIT_SIZE), pygame.SRCALPHA)
     texture_player_2.fill(pygame.Color(255, 255, 255, 10))
     pygame.draw.circle(texture_player_2, "#FFCC00",
                        (utl.UNIT_SIZE // 2, utl.UNIT_SIZE // 2), utl.UNIT_SIZE // 2)
 
     # entité
     player = Player(pygame.Vector3(utl.UNIT_SIZE, utl.UNIT_SIZE, 2), (texture_player, {'normal': [(texture_player, 0),
-                                                                                 (texture_player_2, 200),
-                                                                                 (texture_player, 200)]}), 1.5)
+                                                                                                  (texture_player_2, 200),
+                                                                                                  (texture_player, 200)]}), 1.5)
     # événements
     utl.lie('init_entities', player.reset)
+    utl.lie('powerup', player.change_speed)

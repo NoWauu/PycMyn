@@ -32,7 +32,7 @@ class Fantome(Entity):
         self.time = 0
 
         self.fear_state = False
-        self.fear_seq = Sequence([((self.set_fear, [False]),
+        self.fear_seq = Sequence([((utl.call, ['powerup', {'fear': False}]),
                                    int(utl.TABLE[Fantome.niveau if
                                                  Fantome.niveau <= 20 else 21]['fright_time']) * 1000)])
 
