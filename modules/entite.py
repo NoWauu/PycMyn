@@ -49,7 +49,7 @@ class Entity:
     plateau: plateau.Plateau
     group: List['Entity'] = []
 
-    niveau = 0
+    niveau = 10
 
     def __init__(self, pos: pygame.Vector3, anim_infos: Tuple[pygame.Surface,
                                                               Dict[str, List[Tuple[pygame.Surface, float]]]]) -> None:
@@ -107,3 +107,4 @@ def clear():
         Entity.group[0].destroy()
     utl.clear(['init_entities', 'powerup'])
     utl.call('vide_point', {})
+    utl.call('set_vie', {'nombre': 3})

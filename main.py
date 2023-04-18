@@ -9,7 +9,7 @@ import modules.player as player
 from modules import collectable, entite, plateau
 from modules.graphics import (POLICE, Bouton, Frame, Interface, RelativePos,
                               Texte)
-from modules.overlays import Compteur
+from modules.overlays import Compteur, HealthBar
 
 pygame.init()
 
@@ -54,11 +54,15 @@ def initialise():
     utl.lie('add_point', compteur.incremente)
     utl.lie('vide_point', compteur.vide)
 
+    # vies
+    health_bar = HealthBar(RelativePos(0, 1, 1, 'bottomleft'), pygame.image.load('ressources/textures/coeur.png').convert_alpha(), 3, 'jeux')
+    utl.lie('set_vie', health_bar.set_repetition)
+
     # jeux
     plt = plateau.Plateau()
     entite.Entity.plateau = plt
 
-    #
+    # niveaux
     utl.lie('inc_niveau', entite.Entity.set_niveau)
 
 

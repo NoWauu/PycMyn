@@ -23,7 +23,7 @@ class Player(Entity):
         self.base_speed = speed
         self.speed = self.base_speed * \
             float(utl.TABLE[super().niveau if super().niveau <=
-                  20 else 21]['vitesse_pacman'])
+                  20 else 20]['vitesse_pacman'])
 
         self.time_since_last_frame = pygame.time.get_ticks()
 
@@ -79,9 +79,9 @@ class Player(Entity):
         if isinstance(entity, collectable.Piece):
             utl.call('add_point', {'point': 1})
 
-        elif isinstance(entity, collectable.Pomme):
+        elif isinstance(entity, collectable.Fruit):
             utl.call('add_point', {'point': int(utl.TABLE[super().niveau if super().niveau
-                                                          <= 20 else 21]['points_bonus'])})
+                                                          <= 19 else 20]['points_bonus'])})
 
         elif isinstance(entity, collectable.Super):
             utl.call('powerup', {'fear': True})
@@ -90,10 +90,10 @@ class Player(Entity):
         """change le vitesse"""
         if fear:
             self.speed = self.base_speed * float(utl.TABLE[super().niveau if super().niveau
-                                                           <= 20 else 21]["super_pacman_vitesse"])
+                                                           <= 19 else 20]["super_pacman_vitesse"])
         else:
             self.speed = self.base_speed * float(utl.TABLE[super().niveau if super().niveau
-                                                           <= 20 else 21]["vitesse_pacman"])
+                                                           <= 19 else 20]["vitesse_pacman"])
 
     def interact(self):
         """gestion des intéractions avec le joueur"""
@@ -113,6 +113,7 @@ class Player(Entity):
 
                 elif self.health > 1:
                     self.health -= 1
+                    utl.call('set_vie', {'nombre': self.health})
                     utl.call('init_entities', {})
 
                 else:
@@ -170,7 +171,7 @@ def initialisation():
     # entité
     player = Player(pygame.Vector3(utl.UNIT_SIZE, utl.UNIT_SIZE, 2), (texture_player, {'normal': [(texture_player, 0),
                                                                                                   (texture_player_2, 200),
-                                                                                                  (texture_player, 200)]}), 1.5)
+                                                                                                  (texture_player, 200)]}), 1)
     # événements
     utl.lie('init_entities', player.reset)
     utl.lie('powerup', player.change_speed)

@@ -174,19 +174,15 @@ class Element:
         if isinstance(self.pos, RelativePos):
             ancre = self.pos.aligne
 
-        match ancre:
-            case 'centre':
-                self.rect.center = vect2_to_tuple(self.pos.xy)
-            case 'top':
-                self.rect.centerx, self.rect.top = vect2_to_tuple(self.pos.xy)
-            case 'bottom':
-                self.rect.centerx, self.rect.bottom = vect2_to_tuple(self.pos.xy)
-            case 'left':
-                self.rect.left, self.rect.centery = vect2_to_tuple(self.pos.xy)
-            case 'right':
-                self.rect.right, self.rect.centery = vect2_to_tuple(self.pos.xy)
-            case _:
-                self.rect.topleft = vect2_to_tuple(self.pos.xy)
+        self.rect.center = vect2_to_tuple(self.pos.xy)
+        if 'top' in ancre:
+            self.rect.top = vect2_to_tuple(self.pos.xy)[1]
+        elif 'bottom' in ancre:
+            self.rect.bottom = vect2_to_tuple(self.pos.xy)[1]
+        if 'left' in ancre:
+            self.rect.left = vect2_to_tuple(self.pos.xy)[0]
+        elif 'right' in ancre:
+                self.rect.right = vect2_to_tuple(self.pos.xy)[0]
 
     def update(self):
         """methode de mise à jour"""
