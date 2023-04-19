@@ -78,10 +78,13 @@ class Player(Entity):
         """gestion de la collecte des collectables"""
         if isinstance(entity, collectable.Piece):
             utl.call('add_point', {'point': 1})
+            self.points += 1
 
         elif isinstance(entity, collectable.Fruit):
-            utl.call('add_point', {'point': int(utl.TABLE[super().niveau if super().niveau
-                                                          <= 19 else 20]['points_bonus'])})
+            points = int(utl.TABLE[super().niveau if super().niveau
+                                                          <= 19 else 20]['points_bonus'])
+            utl.call('add_point', {'point': points})
+            self.points += points
 
         elif isinstance(entity, collectable.Super):
             utl.call('powerup', {'fear': True})
@@ -99,12 +102,17 @@ class Player(Entity):
         """gestion des intéractions avec le joueur"""
         for entity in self.collide_with():
             if entity.id == 0:
+                ancien = self.points
                 self.collect(entity)
                 entity.destroy()
 
                 # s'il n'y a plus de pièce, on gagne
                 if len(collectable.Piece.pieces) == 0:
                     victoire()
+                
+                if self.points >= 10000 and ancien < 10000:
+                    self.health += 1
+                    utl.call('set_vie', {'nombre': self.health})
 
             elif entity.id == 1:
                 # cas de collision avec un fantome

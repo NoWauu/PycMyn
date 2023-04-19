@@ -29,7 +29,8 @@ class Fantome(Entity):
             float(utl.TABLE[super().niveau if super().niveau <=
                   20 else 20]['vitesse_fantome'])
 
-        self.comportement, periode = comportement_infos
+        self.base_comportement, periode = comportement_infos
+        self.comportement = self.base_comportement
 
         self.time = 0
 
@@ -49,7 +50,7 @@ class Fantome(Entity):
     def reset(self):
         """reset le fantome lors de sa mort"""
         self.pos.xy = self.start_pos
-        self.fear_state = False
+        self.set_fear(False)
         self.animation.reset_anim()
         self.direction = 1
         self.seq.pause(1500)
@@ -113,11 +114,13 @@ class Fantome(Entity):
                 self.base_speed
             self.animation.start_anim('fear')
             self.fear_seq.start()
+            self.comportement = evite
         else:
             self.speed = self.base_speed * \
                 float(utl.TABLE[super().niveau if super(
                 ).niveau <= 19 else 20]['vitesse_fantome'])
             self.animation.reset_anim()
+            self.comportement = self.base_comportement
 
     def destroy(self) -> None:
         Fantome.fantomes.remove(self)
@@ -180,6 +183,42 @@ def follow(fantome: Fantome, directions: List[int]):
     return directions[produits_scalaires.index(max(produits_scalaires))]
 
 
+def evite(fantome: Fantome, directions: List[int]):
+    """évite pacman"""
+    player = find_joueur()
+
+    direct = (player.pos.xy - fantome.pos.xy).normalize()
+    produits_scalaires = [((direction % 2 == 0) * (-(direction // 2) * 2 + 1) * direct.x +
+                           (direction % 2 == 1) * ((direction // 2) * 2 - 1) * direct.y) for direction in directions]
+    return directions[produits_scalaires.index(min(produits_scalaires))]
+
+
+def piege(fantome: Fantome, directions: List[int]):
+    """
+    renvoie une direction au
+    choix parmi celles proposées
+    """
+    player = find_joueur()
+    coef_dir = 4
+    coef_dst = 3
+
+    if player.mem == -1:
+        return follow(fantome, directions)
+
+    vector: pygame.Vector2 = (player.pos.xy + (coef_dir * utl.UNIT_SIZE *
+                                                             pygame.Vector2((player.mem % 2 == 0) * (-(player.mem // 2) * 2 + 1),
+                                                                            (player.mem % 2 == 1) * ((player.mem // 2) * 2 - 1))) - fantome.pos.xy)
+    
+    if vector.length() < utl.UNIT_SIZE * coef_dst:
+        direct = (player.pos.xy - fantome.pos.xy)
+
+
+    direct = vector.normalize()
+    produits_scalaires = [((direction % 2 == 0) * (-(direction // 2) * 2 + 1) * direct.x +
+                           (direction % 2 == 1) * ((direction // 2) * 2 - 1) * direct.y) for direction in directions]
+    return directions[produits_scalaires.index(max(produits_scalaires))]
+
+
 # setup
 
 
@@ -188,8 +227,12 @@ def initialisation():
     # textures
     texture_blinky = pygame.transform.scale(
         pygame.image.load("ressources/textures/blinky.png").convert_alpha(), (utl.UNIT_SIZE, utl.UNIT_SIZE))
+    texture_clyde = pygame.transform.scale(
+        pygame.image.load("ressources/textures/clyde.png").convert_alpha(), (utl.UNIT_SIZE, utl.UNIT_SIZE))
     texture_inky = pygame.transform.scale(
         pygame.image.load("ressources/textures/inky.png").convert_alpha(), (utl.UNIT_SIZE, utl.UNIT_SIZE))
+    texture_pinky = pygame.transform.scale(
+        pygame.image.load("ressources/textures/pinky.png").convert_alpha(), (utl.UNIT_SIZE, utl.UNIT_SIZE))
 
     texture_fantome_fear = pygame.transform.scale(
         pygame.image.load("ressources/textures/stun.png").convert_alpha(), (utl.UNIT_SIZE, utl.UNIT_SIZE))
@@ -200,25 +243,49 @@ def initialisation():
 
     blinky = Fantome(pygame.Vector3(192, 224, 2), (texture_blinky, {'fear': [(texture_fantome_fear, 0),
                                                                              (texture_fantome_fear, max(int(utl.TABLE[Fantome.niveau
-                                         if Fantome.niveau <= 19 else 20]['fright_time']) * 1000 - int(utl.TABLE[Fantome.niveau
-                                         if Fantome.niveau <= 19 else 20]['nb_flashes'] * 400), 0))],
+                                                                                                                      if Fantome.niveau <= 19 else 20]['fright_time']) * 1000 - int(utl.TABLE[Fantome.niveau
+                                                                                                                                                                                              if Fantome.niveau <= 19 else 20]['nb_flashes'] * 400), 0))],
                                                                     'fear_blink': [(texture_fantome_fear, 0),
                                                                                    (texture_fantome_fear_2, 200),
                                                                                    (texture_blinky, 200)]}),
-                     (aleatoire, 5000))
+                     (follow, 5000))
+    clyde = Fantome(pygame.Vector3(192, 224, 2), (texture_clyde, {'fear': [(texture_fantome_fear, 0),
+                                                                           (texture_fantome_fear, max(int(utl.TABLE[Fantome.niveau
+                                                                                                                    if Fantome.niveau <= 19 else 20]['fright_time']) * 1000 - int(utl.TABLE[Fantome.niveau
+                                                                                                                                                                                            if Fantome.niveau <= 19 else 20]['nb_flashes'] * 400), 0))],
+                                                                  'fear_blink': [(texture_fantome_fear, 0),
+                                                                                 (texture_fantome_fear_2, 200),
+                                                                                 (texture_clyde, 200)]}),
+                    (aleatoire, 1000))
     inky = Fantome(pygame.Vector3(192, 224, 2), (texture_inky, {'fear': [(texture_fantome_fear, 0),
-                                                                             (texture_fantome_fear, max(int(utl.TABLE[Fantome.niveau
-                                         if Fantome.niveau <= 19 else 20]['fright_time']) * 1000 - int(utl.TABLE[Fantome.niveau
-                                         if Fantome.niveau <= 19 else 20]['nb_flashes'] * 400), 0))],
+                                                                         (texture_fantome_fear, max(int(utl.TABLE[Fantome.niveau
+                                                                                                                  if Fantome.niveau <= 19 else 20]['fright_time']) * 1000 - int(utl.TABLE[Fantome.niveau
+                                                                                                                                                                                          if Fantome.niveau <= 19 else 20]['nb_flashes'] * 400), 0))],
                                                                 'fear_blink': [(texture_fantome_fear, 0),
                                                                                (texture_fantome_fear_2, 200),
                                                                                (texture_inky, 200)]}),
-                   (follow, 1000))
+                   (evite, 1000))
+    
+    pinky = Fantome(pygame.Vector3(192, 224, 2), (texture_pinky, {'fear': [(texture_fantome_fear, 0),
+                                                                         (texture_fantome_fear, max(int(utl.TABLE[Fantome.niveau
+                                                                                                                  if Fantome.niveau <= 19 else 20]['fright_time']) * 1000 - int(utl.TABLE[Fantome.niveau
+                                                                                                                                                                                          if Fantome.niveau <= 19 else 20]['nb_flashes'] * 400), 0))],
+                                                                'fear_blink': [(texture_fantome_fear, 0),
+                                                                               (texture_fantome_fear_2, 200),
+                                                                               (texture_pinky, 200)]}),
+                   (piege, 1000))
+
     Porte(pygame.Vector3(208, 196, 1), 32)
 
     # événements
     utl.lie('init_entities', blinky.reset)
     utl.lie('powerup', blinky.set_fear)
 
+    utl.lie('init_entities', clyde.reset)
+    utl.lie('powerup', clyde.set_fear)
+
     utl.lie('init_entities', inky.reset)
     utl.lie('powerup', inky.set_fear)
+
+    utl.lie('init_entities', pinky.reset)
+    utl.lie('powerup', pinky.set_fear)

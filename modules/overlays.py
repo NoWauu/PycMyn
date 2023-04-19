@@ -50,3 +50,18 @@ class HealthBar:
 
         self.element.surface = surface
         self.element.rect = self.element.surface.get_rect()
+
+
+class DtRenderer:
+
+    def __init__(self, pos: RelativePos | pygame.Vector3, interface_nom: str | None = None) -> None:
+        self.pos = pos
+        self.texte = Texte(pos, interface_nom = interface_nom)
+        self.element = Element(self, pygame.Surface((0, 0)), pygame.Rect(0, 0, 0, 0), interface_nom)
+        self.dt = 0
+        self.time = pygame.time.get_ticks()
+
+    def update(self):
+        self.dt = pygame.time.get_ticks() - self.time
+        self.time = pygame.time.get_ticks()
+        self.texte.texte = str(self.dt)
