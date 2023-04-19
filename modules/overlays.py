@@ -1,7 +1,9 @@
 """modules de définition des overlays"""
 import pygame
 
-from modules.graphics import Texte, RelativePos, Element
+from modules.graphics import Texte, RelativePos, Element, StaticElement
+from modules.outils import extend_mask, forme_mask
+
 
 pygame.init()
 
@@ -51,6 +53,7 @@ class HealthBar:
         self.element.surface = surface
         self.element.rect = self.element.surface.get_rect()
 
+<<<<<<< Updated upstream
 
 class DtRenderer:
 
@@ -65,3 +68,11 @@ class DtRenderer:
         self.dt = pygame.time.get_ticks() - self.time
         self.time = pygame.time.get_ticks()
         self.texte.texte = str(self.dt)
+=======
+class Background:
+    def __init__(self) -> None:
+        surface = pygame.image.load('ressources/textures/image.png')
+        self.pos = pygame.Vector3(0, 0, 0)
+
+        self.element = StaticElement(self, surface, pygame.Mask(), 'background')
+>>>>>>> Stashed changes

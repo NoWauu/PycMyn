@@ -8,8 +8,13 @@ import modules.outils as utl
 import modules.player as player
 from modules import collectable, entite, plateau
 from modules.graphics import (POLICE, Bouton, Frame, Interface, RelativePos,
+<<<<<<< Updated upstream
                               Texte)
 from modules.overlays import Compteur, DtRenderer, HealthBar
+=======
+                              Texte, StaticElement)
+from modules.overlays import Compteur, HealthBar, Background
+>>>>>>> Stashed changes
 
 pygame.init()
 
@@ -35,9 +40,12 @@ def initialise():
     """fonction d'initialisation"""
     # création du menu
     interface_menu = Interface('menu')
+    
+    Background()
 
-    Bouton(RelativePos(0.5, 0.5, 1), POLICE.render('Jouer', True, '#FFFFFF'),
+    Bouton(RelativePos(0.5, 0.5, 1), POLICE.render('Play', True, '#FFFFFF'),
            play, 'menu')
+
 
     Interface.current_interface = interface_menu
 
