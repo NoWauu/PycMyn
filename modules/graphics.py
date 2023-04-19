@@ -112,6 +112,12 @@ class Interface:
             if hasattr(elm.objet, 'on_click'):
                 elm.objet.on_click(event)
 
+    def on_video_resize(self):
+        """réaction au changement de la taille de la fenêtre"""
+        for elm in self.elements:
+            if hasattr(elm.objet, 'on_video_resize'):
+                elm.objet.on_video_resize()
+
     def update(self):
         for elm in self.elements:
             if hasattr(elm, 'objet') and hasattr(elm.objet, 'update'):

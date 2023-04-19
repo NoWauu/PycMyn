@@ -2,8 +2,7 @@
 import pygame
 
 from modules.graphics import Texte, RelativePos, Element, StaticElement
-from modules.outils import extend_mask, forme_mask
-
+import modules.outils as utl
 
 pygame.init()
 
@@ -53,8 +52,6 @@ class HealthBar:
         self.element.surface = surface
         self.element.rect = self.element.surface.get_rect()
 
-<<<<<<< Updated upstream
-
 class DtRenderer:
 
     def __init__(self, pos: RelativePos | pygame.Vector3, interface_nom: str | None = None) -> None:
@@ -68,11 +65,16 @@ class DtRenderer:
         self.dt = pygame.time.get_ticks() - self.time
         self.time = pygame.time.get_ticks()
         self.texte.texte = str(self.dt)
-=======
+
 class Background:
-    def __init__(self) -> None:
-        surface = pygame.image.load('ressources/textures/image.png')
+    """classe de représentation de fond"""
+
+    def __init__(self, texture: pygame.Surface, interface_nom: str | None = None) -> None:
         self.pos = pygame.Vector3(0, 0, 0)
 
-        self.element = StaticElement(self, surface, pygame.Mask(), 'background')
->>>>>>> Stashed changes
+        self.element = StaticElement(self, texture, pygame.Mask((0, 0)), interface_nom)
+
+    def on_video_resize(self):
+        """ajuste la texture à la fenêtre"""
+        self.element.surface = pygame.transform.scale_by(self.element.surface, max(utl.WINDOW.get_width() / self.element.surface.get_width(), utl.WINDOW.get_height() / self.element.surface.get_height()))
+        self.element.rect = self.element.surface.get_rect()

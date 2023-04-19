@@ -213,7 +213,7 @@ def piege(fantome: Fantome, directions: List[int]):
         direct = (player.pos.xy - fantome.pos.xy)
 
 
-    direct = vector.normalize()
+    direct = vector.normalize() if vector.length() != 0 else vector
     produits_scalaires = [((direction % 2 == 0) * (-(direction // 2) * 2 + 1) * direct.x +
                            (direction % 2 == 1) * ((direction // 2) * 2 - 1) * direct.y) for direction in directions]
     return directions[produits_scalaires.index(max(produits_scalaires))]

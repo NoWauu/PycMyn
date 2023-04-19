@@ -7,14 +7,9 @@ import modules.fantome as fantome
 import modules.outils as utl
 import modules.player as player
 from modules import collectable, entite, plateau
-from modules.graphics import (POLICE, Bouton, Frame, Interface, RelativePos,
-<<<<<<< Updated upstream
-                              Texte)
-from modules.overlays import Compteur, DtRenderer, HealthBar
-=======
-                              Texte, StaticElement)
-from modules.overlays import Compteur, HealthBar, Background
->>>>>>> Stashed changes
+from modules.graphics import (
+    POLICE, Bouton, Frame, Interface, RelativePos, Texte)
+from modules.overlays import Compteur, DtRenderer, HealthBar, Background
 
 pygame.init()
 
@@ -23,6 +18,7 @@ pygame.init()
 RelativePos.window = utl.WINDOW
 
 # fonctions principales
+
 
 def play():
     """lance une partie"""
@@ -36,16 +32,19 @@ def play():
 
     Interface.change_interface('jeux')
 
+
 def initialise():
     """fonction d'initialisation"""
     # création du menu
     interface_menu = Interface('menu')
-    
-    Background()
+
+    background = pygame.image.load('ressources/textures/pacman_background.png').convert_alpha()
+    background = pygame.transform.scale_by(background, max(utl.WINDOW.get_width() / background.get_width(), utl.WINDOW.get_height() / background.get_height()))
+    background.scroll(dx = -30, dy = -500)
+    Background(background, 'menu')
 
     Bouton(RelativePos(0.5, 0.5, 1), POLICE.render('Play', True, '#FFFFFF'),
            play, 'menu')
-
 
     Interface.current_interface = interface_menu
 
@@ -54,9 +53,11 @@ def initialise():
     Interface('jeux')
     Frame('plateau', interface_plateau, pygame.Surface((448, 496)),
           RelativePos(0.5, 0.5, 0), 'jeux')
-    texte_niveau = Texte(RelativePos(0.5, 1, 1, aligne='bottom'), f'niveau: {entite.Entity.niveau}', interface_nom='jeux')
-    utl.lie('inc_niveau', lambda niveau: setattr(texte_niveau, 'texte', f'niveau: {niveau + 1}'))
-    
+    texte_niveau = Texte(RelativePos(0.5, 1, 1, aligne='bottom'),
+                         f'niveau: {entite.Entity.niveau}', interface_nom='jeux')
+    utl.lie('inc_niveau', lambda niveau: setattr(
+        texte_niveau, 'texte', f'niveau: {niveau + 1}'))
+
     # compteur de points
     compteur = Compteur(RelativePos(0.5, 0, 1, aligne='top'), 'jeux')
     utl.lie('add_point', compteur.incremente)
@@ -65,7 +66,8 @@ def initialise():
     DtRenderer(RelativePos(1, 0, 1, aligne='topright'), interface_nom='jeux')
 
     # vies
-    health_bar = HealthBar(RelativePos(0, 1, 1, 'bottomleft'), pygame.image.load('ressources/textures/coeur.png').convert_alpha(), 3, 'jeux')
+    health_bar = HealthBar(RelativePos(0, 1, 1, 'bottomleft'), pygame.image.load(
+        'ressources/textures/coeur.png').convert_alpha(), 3, 'jeux')
     utl.lie('set_vie', health_bar.set_repetition)
 
     # jeux
@@ -86,6 +88,8 @@ def handle_event(events: List[pygame.event.Event]) -> bool:
                 Interface.current_interface.on_keypress(event)
             case pygame.MOUSEBUTTONDOWN:
                 Interface.current_interface.on_click(event)
+            case pygame.VIDEORESIZE:
+                Interface.current_interface.on_video_resize()
             case _:
                 ...
     return True
