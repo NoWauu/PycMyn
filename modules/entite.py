@@ -49,7 +49,7 @@ class Entity:
     plateau: plateau.Plateau
     group: List['Entity'] = []
 
-    niveau = 10
+    niveau = 0
 
     def __init__(self, pos: pygame.Vector3, anim_infos: Tuple[pygame.Surface,
                                                               Dict[str, List[Tuple[pygame.Surface, float]]]]) -> None:

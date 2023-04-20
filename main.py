@@ -8,7 +8,7 @@ import modules.outils as utl
 import modules.player as player
 from modules import collectable, entite, plateau
 from modules.graphics import (
-    POLICE, Bouton, Frame, Interface, RelativePos, Texte)
+    Bouton, Frame, Interface, RelativePos, Texte)
 from modules.overlays import Compteur, DtRenderer, HealthBar, Background
 
 pygame.init()
@@ -43,7 +43,8 @@ def initialise():
     background.scroll(dx = -30, dy = -500)
     Background(background, 'menu')
 
-    Bouton(RelativePos(0.5, 0.5, 1), POLICE.render('Play', True, '#FFFFFF'),
+    # bouton de lancement du jeux
+    Bouton(RelativePos(0.65, 0.17, 1), pygame.Surface((200, 50), pygame.SRCALPHA),
            play, 'menu')
 
     Interface.current_interface = interface_menu

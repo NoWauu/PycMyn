@@ -29,6 +29,7 @@ class Player(Entity):
 
         self.health = 3
         self.points = 0
+        self.eat_bonus = 0
 
     def on_keypress(self, event: pygame.event.Event):
         """méthode de traitement des touches"""
@@ -89,14 +90,16 @@ class Player(Entity):
         elif isinstance(entity, collectable.Super):
             utl.call('powerup', {'fear': True})
 
-    def change_speed(self, fear: bool):
+    def super_pacman(self, fear: bool):
         """change le vitesse"""
         if fear:
             self.speed = self.base_speed * float(utl.TABLE[super().niveau if super().niveau
                                                            <= 19 else 20]["super_pacman_vitesse"])
+            self.eat_bonus = 200
         else:
             self.speed = self.base_speed * float(utl.TABLE[super().niveau if super().niveau
                                                            <= 19 else 20]["vitesse_pacman"])
+            self.eat_bonus = 0
 
     def interact(self):
         """gestion des intéractions avec le joueur"""
@@ -118,6 +121,8 @@ class Player(Entity):
                 # cas de collision avec un fantome
                 if entity.fear_state:
                     entity.reset()
+                    utl.call('add_point', {'point': self.eat_bonus})
+                    self.eat_bonus *= 2
 
                 elif self.health > 1:
                     self.health -= 1
@@ -182,4 +187,4 @@ def initialisation():
                                                                                                   (texture_player, 200)]}), 1)
     # événements
     utl.lie('init_entities', player.reset)
-    utl.lie('powerup', player.change_speed)
+    utl.lie('powerup', player.super_pacman)
