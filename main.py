@@ -20,6 +20,14 @@ RelativePos.window = utl.WINDOW
 # fonctions principales
 
 
+def fin_partie():
+    """reactive l'interface de menu"""
+    utl.call('victoire', {'able': False})
+    utl.call('defaite', {'able': False})
+    entite.clear()
+    Interface.change_interface('menu')
+
+
 def play():
     """lance une partie"""
     # initialisation du terrain
@@ -55,7 +63,7 @@ def initialise():
     Frame('plateau', interface_plateau, pygame.Surface((448, 496)),
           RelativePos(0.5, 0.5, 0), 'jeux')
     texte_niveau = Texte(RelativePos(0.5, 1, 1, aligne='bottom'),
-                         f'niveau: {entite.Entity.niveau}', interface_nom='jeux')
+                         f'niveau: {entite.Entity.niveau + 1}', interface_nom='jeux')
     utl.lie('inc_niveau', lambda niveau: setattr(
         texte_niveau, 'texte', f'niveau: {niveau + 1}'))
 
@@ -74,6 +82,22 @@ def initialise():
     # jeux
     plt = plateau.Plateau()
     entite.Entity.plateau = plt
+
+    # victoire et défaite
+    Interface('fin_partie')
+    victoire_texte = pygame.transform.scale(pygame.image.load('ressources/textures/victoire.png').convert_alpha(), utl.WINDOW.get_size())
+    victoire_background = Background(victoire_texte, 'fin_partie')
+    Bouton(RelativePos(0.5, 0.5, 2), pygame.Surface(victoire_background.element.surface.get_size(), pygame.SRCALPHA),
+           fin_partie, interface_nom='fin_partie')
+    utl.lie('victoire', victoire_background.element.able)
+    victoire_background.element.able(able=False)
+
+    defaite_texte = pygame.transform.scale(pygame.image.load('ressources/textures/defaite.png').convert_alpha(), utl.WINDOW.get_size())
+    defaite_background = Background(defaite_texte, 'fin_partie')
+    Bouton(RelativePos(0.5, 0.5, 2), pygame.Surface(defaite_background.element.surface.get_size(), pygame.SRCALPHA),
+           fin_partie, interface_nom='fin_partie')
+    utl.lie('defaite', defaite_background.element.able)
+    defaite_background.element.able(able=False)
 
     # niveaux
     utl.lie('inc_niveau', entite.Entity.set_niveau)

@@ -96,7 +96,7 @@ class Fantome(Entity):
             new_direction = self.comportement(self, directions)
         elif len(directions) > 0:
             new_direction = directions[0]
-            Sequence([((print, ['hi']), 0), ((setattr, [self, 'direction', self.direction]), 1000)], local=True).start()
+            Sequence([((setattr, [self, 'direction', self.direction]), 200)], local=True).start()
             self.direction = new_direction
 
         # s'il y a une nouvelle direction, on met à jour la position
@@ -179,7 +179,8 @@ def follow(fantome: Fantome, directions: List[int]):
     """
     player = find_joueur()
 
-    direct = (player.pos.xy - fantome.pos.xy).normalize()
+    vector = (player.pos.xy - fantome.pos.xy)
+    direct = vector.normalize() if vector.length() != 0 else vector
     produits_scalaires = [((direction % 2 == 0) * (-(direction // 2) * 2 + 1) * direct.x +
                            (direction % 2 == 1) * ((direction // 2) * 2 - 1) * direct.y) for direction in directions]
     return directions[produits_scalaires.index(max(produits_scalaires))]
@@ -188,10 +189,12 @@ def follow(fantome: Fantome, directions: List[int]):
 def evite(fantome: Fantome, directions: List[int]):
     """évite pacman"""
     player = find_joueur()
+    vector = (player.pos.xy - fantome.pos.xy)
 
-    direct = (player.pos.xy - fantome.pos.xy).normalize()
+    direct = vector.normalize()
     produits_scalaires = [((direction % 2 == 0) * (-(direction // 2) * 2 + 1) * direct.x +
                            (direction % 2 == 1) * ((direction // 2) * 2 - 1) * direct.y) for direction in directions]
+
     return directions[produits_scalaires.index(min(produits_scalaires))]
 
 
@@ -248,7 +251,7 @@ def initialisation():
                                                                     'fear_blink': [(texture_fantome_fear, 0),
                                                                                    (texture_fantome_fear_2, 200),
                                                                                    (texture_blinky, 200)]}),
-                     (follow, 5000))
+                     (follow, 1000))
     clyde = Fantome(pygame.Vector3(192, 224, 2), (texture_clyde, {'fear': [(texture_fantome_fear, 0),
                                                                            (texture_fantome_fear, max(int(utl.TABLE[Fantome.niveau
                                                                                                                     if Fantome.niveau <= 19 else 20]['fright_time']) * 1000 - int(utl.TABLE[Fantome.niveau

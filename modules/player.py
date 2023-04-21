@@ -4,8 +4,9 @@ import pygame
 
 import modules.outils as utl
 from modules import collectable
-from modules.entite import CASE, Entity, clear
-from modules.graphics import Interface
+from modules.entite import CASE, Entity
+from modules.graphics import Interface, Sequence
+import modules.sounds as sounds
 
 pygame.init()
 
@@ -30,6 +31,11 @@ class Player(Entity):
         self.health = 3
         self.points = 0
         self.eat_bonus = 0
+
+        # sounds
+        self.eat_seq = Sequence([((lambda: sounds.EAT_SOUND.play(), []), 0),
+                                 (None, int(sounds.EAT_SOUND.get_length() * 1000 - 215))],
+                                 False)
 
     def on_keypress(self, event: pygame.event.Event):
         """méthode de traitement des touches"""
@@ -72,7 +78,8 @@ class Player(Entity):
                 futur = CASE[self.mem](self.pos.xy, 10/self.dt, self.dt)
                 # si on peut tout de même avancer légèrement
                 # on avance de 1 pixel
-                if not self.collide_wall(futur):
+                if not self.collide_wall(futur) and not any([enit.hard_collide for enit in
+                         self.collide_with(futur)]):
                     self.pos.xy = futur
 
     def collect(self, entity: Entity):
@@ -80,12 +87,15 @@ class Player(Entity):
         if isinstance(entity, collectable.Piece):
             utl.call('add_point', {'point': 1})
             self.points += 1
+            if not self.eat_seq.is_running:
+                self.eat_seq.start()
 
         elif isinstance(entity, collectable.Fruit):
             points = int(utl.TABLE[super().niveau if super().niveau
                                                           <= 19 else 20]['points_bonus'])
             utl.call('add_point', {'point': points})
             self.points += points
+            sounds.FRUIT_SOUND.play()
 
         elif isinstance(entity, collectable.Super):
             utl.call('powerup', {'fear': True})
@@ -116,6 +126,7 @@ class Player(Entity):
                 if self.points >= 10000 and ancien < 10000:
                     self.health += 1
                     utl.call('set_vie', {'nombre': self.health})
+                    sounds.EXTRA_SOUND.play()
 
             elif entity.id == 1:
                 # cas de collision avec un fantome
@@ -123,11 +134,14 @@ class Player(Entity):
                     entity.reset()
                     utl.call('add_point', {'point': self.eat_bonus})
                     self.eat_bonus *= 2
+                    sounds.GHOST_SOUND.play()
 
                 elif self.health > 1:
                     self.health -= 1
                     utl.call('set_vie', {'nombre': self.health})
                     utl.call('init_entities', {})
+                    sounds.DEATH_SOUND.play()
+                    return
 
                 else:
                     defaite()
@@ -148,22 +162,23 @@ class Player(Entity):
             self.animation.start_anim('normal')
 
         self.interact()
+        self.eat_seq.step()
 
 # fonction
 
 
 def victoire():
     """victoire"""
-    clear()
     utl.call('inc_niveau', {'niveau': Entity.niveau + 1})
-    Interface.change_interface('menu')
+    utl.call('victoire', {'able': True})
+    Interface.change_interface('fin_partie')
 
 
 def defaite():
     """défaite"""
-    clear()
     utl.call('inc_niveau', {'niveau': 0})
-    Interface.change_interface('menu')
+    utl.call('defaite', {'able': True})
+    Interface.change_interface('fin_partie')
 
 
 # setup

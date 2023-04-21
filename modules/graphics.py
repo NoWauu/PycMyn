@@ -1,5 +1,5 @@
 """module de définition des classes principales"""
-from typing import List, Any, Set, Tuple, Dict, Callable
+from typing import List, Any, Tuple, Dict, Callable
 import pygame
 
 from modules.outils import dichotomie, forme_mask, UNIT_SIZE
@@ -39,7 +39,7 @@ class Sequence:
         for elm in seq:
             self.fnct.append(elm[0])
             self.times.append(elm[1])
-        
+
         if local:
             Sequence.sequences.append(self)
 
@@ -56,7 +56,8 @@ class Sequence:
     def pause(self, temps: int):
         """effectue une pause dans la séquence"""
         self.is_running = False
-        self.pause_seq = Sequence([((lambda: setattr(self, 'is_running', True), []), temps)])
+        self.pause_seq = Sequence(
+            [((lambda: setattr(self, 'is_running', True), []), temps)])
         self.pause_seq.start()
 
     def step(self):
@@ -90,10 +91,15 @@ class Sequence:
     @classmethod
     def update(cls):
         """mise à jour de toutes les séquences"""
-        i = 0
-        while i < len(cls.sequences):
-            seq = cls.sequences[i]
+        a_detruire: List['Sequence'] = []
+        for seq in cls.sequences:
             seq.step()
+            if seq.local and not seq.is_running:
+                a_detruire.append(seq)
+
+        while len(a_detruire) > 0:
+            a_detruire[0].destroy()
+            a_detruire.pop(0)
 
 
 class Interface:
@@ -127,7 +133,7 @@ class Interface:
     def on_click(self, event: pygame.event.Event):
         """gestion des cliques"""
         for elm in self.elements:
-            if hasattr(elm.objet, 'on_click'):
+            if elm.enabled and hasattr(elm.objet, 'on_click'):
                 elm.objet.on_click(event)
 
     def on_video_resize(self):
@@ -178,6 +184,8 @@ class Element:
         self.pos: pygame.Vector3 | RelativePos = self.objet.pos
         self.interface: Interface
 
+        self.enabled = True
+
         if interface_nom is None:
             Interface.current_interface.add_element(self)
         else:
@@ -188,6 +196,10 @@ class Element:
     def delie(self):
         """délie l'élément"""
         self.interface.remove_element(self)
+
+    def able(self, *, able: bool = True):
+        """active l'élément"""
+        self.enabled = able
 
     def ancre(self):
         """ancre le rectangle à la bonne position"""
@@ -206,7 +218,7 @@ class Element:
         if 'left' in ancre:
             self.rect.left = vect2_to_tuple(self.pos.xy)[0]
         elif 'right' in ancre:
-                self.rect.right = vect2_to_tuple(self.pos.xy)[0]
+            self.rect.right = vect2_to_tuple(self.pos.xy)[0]
 
     def update(self):
         """methode de mise à jour"""
@@ -224,7 +236,7 @@ class Element:
 
     def render(self):
         """méthode d'affichage"""
-        return self.surface, self.rect
+        return (self.surface, self.rect) if self.enabled else (pygame.Surface((0, 0)), pygame.Rect(0, 0, 0,0))
 
 
 class Frame:
@@ -369,16 +381,22 @@ class Texte:
     """gestion des textes"""
 
     def __init__(self, pos: pygame.Vector3 | RelativePos, texte: str = "", couleur: str = "#FFFFFF",
-                 background_couleur: str = "#000000", interface_nom: str | None= None) -> None:
+                 background_couleur: str = "#000000", interface_nom: str | None = None, scale: int = 1) -> None:
         self.pos = pos
         self.texte = texte
         self.couleur = couleur
         self.background_couleur = background_couleur
-        surface = POLICE.render(self.texte, True, self.couleur, self.background_couleur)
-        self.element = Element(self, surface, surface.get_rect(), interface_nom)
+        self.scale = scale
+        surface = POLICE.render(
+            self.texte, True, self.couleur, self.background_couleur)
+        surface = pygame.transform.scale_by(surface, self.scale)
+        self.element = Element(
+            self, surface, surface.get_rect(), interface_nom)
 
     def update(self):
         """mise à jour"""
-        surface = POLICE.render(self.texte, True, self.couleur, self.background_couleur)
+        surface = POLICE.render(
+            self.texte, True, self.couleur, self.background_couleur)
+        surface = pygame.transform.scale_by(surface, self.scale)
         self.element.surface = surface
         self.element.rect = surface.get_rect()
