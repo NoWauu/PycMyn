@@ -96,6 +96,8 @@ class Fantome(Entity):
             new_direction = self.comportement(self, directions)
         elif len(directions) > 0:
             new_direction = directions[0]
+            Sequence([((print, ['hi']), 0), ((setattr, [self, 'direction', self.direction]), 1000)], local=True).start()
+            self.direction = new_direction
 
         # s'il y a une nouvelle direction, on met à jour la position
         if new_direction != -1:
@@ -131,10 +133,10 @@ class Fantome(Entity):
         self.dt = pygame.time.get_ticks() - self.time
         self.time = pygame.time.get_ticks()
 
-        self.seq.update()
+        self.seq.step()
         self.controle()
 
-        self.fear_seq.update()
+        self.fear_seq.step()
 
         if self.fear_state and not self.animation.seq.is_running:
             self.animation.start_anim('fear_blink')

@@ -8,7 +8,7 @@ import modules.outils as utl
 import modules.player as player
 from modules import collectable, entite, plateau
 from modules.graphics import (
-    Bouton, Frame, Interface, RelativePos, Texte)
+    Bouton, Frame, Interface, RelativePos, Texte, Sequence)
 from modules.overlays import Compteur, DtRenderer, HealthBar, Background
 
 pygame.init()
@@ -99,6 +99,7 @@ def handle_event(events: List[pygame.event.Event]) -> bool:
 def update():
     """fonction de mis à jour"""
     utl.WINDOW.fill('#000000')
+    Sequence.update()
     Interface.current_interface.update()
     utl.WINDOW.blits(Interface.current_interface.render())
     pygame.display.flip()

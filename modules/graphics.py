@@ -1,5 +1,5 @@
 """module de définition des classes principales"""
-from typing import List, Any, Tuple, Dict, Callable
+from typing import List, Any, Set, Tuple, Dict, Callable
 import pygame
 
 from modules.outils import dichotomie, forme_mask, UNIT_SIZE
@@ -22,8 +22,9 @@ def vect2_to_tuple(vecteur: pygame.Vector2):
 
 class Sequence:
     """classe de gestion des séquences"""
+    sequences: List['Sequence'] = []
 
-    def __init__(self, seq: List[Tuple[Tuple[Callable[..., None], List[Any]] | None, float]], loop: bool = False) -> None:
+    def __init__(self, seq: List[Tuple[Tuple[Callable[..., None], List[Any]] | None, float]], loop: bool = False, local: bool = False) -> None:
 
         self.fnct: List[Tuple[Callable[..., None], List[Any]] | None] = []
         self.times: List[float] = []
@@ -31,12 +32,16 @@ class Sequence:
         self.sqc_timer = pygame.time.get_ticks()
         self.pointer = 0
         self.loop = loop
+        self.local = local
 
         self.pause_seq: Sequence | None = None
 
         for elm in seq:
             self.fnct.append(elm[0])
             self.times.append(elm[1])
+        
+        if local:
+            Sequence.sequences.append(self)
 
     def start(self):
         """commence la séquence"""
@@ -54,10 +59,10 @@ class Sequence:
         self.pause_seq = Sequence([((lambda: setattr(self, 'is_running', True), []), temps)])
         self.pause_seq.start()
 
-    def update(self):
+    def step(self):
         """met à jour la séquence"""
         if self.pause_seq is not None and self.pause_seq.is_running:
-            self.pause_seq.update()
+            self.pause_seq.step()
             return False
 
         if not self.is_running or (self.times[self.pointer] >
@@ -76,6 +81,19 @@ class Sequence:
             else:
                 self.is_running = False
         return True
+
+    def destroy(self):
+        """détruit la séquence"""
+        Sequence.sequences.remove(self)
+        del self
+
+    @classmethod
+    def update(cls):
+        """mise à jour de toutes les séquences"""
+        i = 0
+        while i < len(cls.sequences):
+            seq = cls.sequences[i]
+            seq.step()
 
 
 class Interface:
@@ -313,7 +331,7 @@ class AnimElement(Element):
         passe à la texture suivante"""
         change = False
         if self.seq.is_running:
-            change = self.seq.update()
+            change = self.seq.step()
         else:
             change = self.current_texture != self.default_texture
             self.current_texture = self.default_texture
