@@ -41,3 +41,10 @@ Fichiers récupérés sur le site [classicgaming.cc](https://classicgaming.cc/cl
 - [pacman_eatfruit.wav](https://classicgaming.cc/classics/pac-man/files/sounds/pacman-eatfruit.zip)
 - [pacman_eatghost.wav](https://classicgaming.cc/classics/pac-man/files/sounds/pacman-eatghost.zip)
 - [pacman_extra.wav](https://classicgaming.cc/classics/pac-man/files/sounds/pacman-extrapac.zip)
+
+
+# Licence Pacman
+
+Pacman ® & © 1980-2023 Bandai Namco
+Licensed to Bandai Namco
+All Rights Reserved
