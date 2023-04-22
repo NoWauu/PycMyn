@@ -145,6 +145,7 @@ class Player(Entity):
 
                 else:
                     defaite()
+                    sounds.DEATH_SOUND.play()
 
     def reset(self):
         """initialise une manche"""
@@ -171,6 +172,7 @@ def victoire():
     """victoire"""
     utl.call('inc_niveau', {'niveau': Entity.niveau + 1})
     utl.call('victoire', {'able': True})
+    utl.call('fin_partie', {})
     Interface.change_interface('fin_partie')
 
 
@@ -178,6 +180,7 @@ def defaite():
     """défaite"""
     utl.call('inc_niveau', {'niveau': 0})
     utl.call('defaite', {'able': True})
+    utl.call('fin_partie', {})
     Interface.change_interface('fin_partie')
 
 

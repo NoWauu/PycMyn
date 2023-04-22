@@ -14,22 +14,22 @@ pygame.init()
 
 def haut(pos: pygame.Vector2, speed: float, dt: float):
     """déplacement vers le haut"""
-    return pygame.Vector2(pos.x, round(utl.reste_etendu((pos.y - speed * dt / 10), Frame.frames['plateau'].surface.get_height())))
+    return pygame.Vector2(pos.x, round(utl.reste_etendu((pos.y - speed * dt / 10), Frame.get_surface_by_name('plateau').get_height())))
 
 
 def bas(pos: pygame.Vector2, speed: float, dt: float):
     """déplacement vers le bas"""
-    return pygame.Vector2(pos.x, round(utl.reste_etendu((pos.y + speed * dt / 10), Frame.frames['plateau'].surface.get_height())))
+    return pygame.Vector2(pos.x, round(utl.reste_etendu((pos.y + speed * dt / 10), Frame.get_surface_by_name('plateau').get_height())))
 
 
 def gauche(pos: pygame.Vector2, speed: float, dt: float):
     """déplacement vers la gauche"""
-    return pygame.Vector2(round(utl.reste_etendu((pos.x - speed * dt / 10), Frame.frames['plateau'].surface.get_width())), pos.y)
+    return pygame.Vector2(round(utl.reste_etendu((pos.x - speed * dt / 10), Frame.get_surface_by_name('plateau').get_width())), pos.y)
 
 
 def droite(pos: pygame.Vector2, speed: float, dt: float):
     """déplacement vers la droite"""
-    return pygame.Vector2(round(utl.reste_etendu((pos.x + speed * dt / 10), Frame.frames['plateau'].surface.get_width())), pos.y)
+    return pygame.Vector2(round(utl.reste_etendu((pos.x + speed * dt / 10), Frame.get_surface_by_name('plateau').get_width())), pos.y)
 
 
 def immobile(pos: pygame.Vector2, speed: float, dt: float):

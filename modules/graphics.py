@@ -49,7 +49,7 @@ class Sequence:
         self.pointer = 0
         self.sqc_timer = pygame.time.get_ticks()
 
-    def fin(self):
+    def stop(self):
         """met fin à la séquence"""
         self.is_running = False
 
@@ -94,7 +94,7 @@ class Sequence:
         a_detruire: List['Sequence'] = []
         for seq in cls.sequences:
             seq.step()
-            if seq.local and not seq.is_running:
+            if seq.local and not seq.is_running and not seq.loop:
                 a_detruire.append(seq)
 
         while len(a_detruire) > 0:
@@ -109,6 +109,7 @@ class Interface:
 
     def __init__(self, nom: str | None = None) -> None:
         self.elements: List['Element'] = []
+        self.nom = nom
 
         if nom is not None:
             Interface.interfaces[nom] = self
@@ -252,7 +253,7 @@ class Frame:
         self.rect = self.surface.get_rect()
         self.pos = pos
         self.interface = interface
-        self.element = Element(self, surface, self.rect, interface_nom, False)
+        self.element = Element(self, self.surface.copy(), self.rect, interface_nom, False)
 
         if nom not in Frame.frames:
             Frame.frames[nom] = self
@@ -264,9 +265,16 @@ class Frame:
     def update(self):
         """méthode de mise à jour"""
         # clear
-        self.surface.fill('#000000')
+        self.element.surface = self.surface.copy()
         self.interface.update()
-        self.surface.blits(list(self.interface.render()))
+        self.element.surface.blits(list(self.interface.render()))
+
+    @classmethod
+    def get_surface_by_name(cls, nom: str):
+        """récupère la surface d'une frame à partir de son nom"""
+        if nom in cls.frames:
+            return cls.frames[nom].surface
+        return pygame.Surface((0, 0))
 
 
 class RelativePos:
@@ -274,21 +282,23 @@ class RelativePos:
     classe de représentation
     des positions variables
     """
-    window: pygame.Surface
+    general_window: pygame.Surface
 
-    def __init__(self, relx: float, rely: float, posz: int, aligne: str = 'centre') -> None:
+    def __init__(self, relx: float, rely: float, posz: int, aligne: str = 'centre', window: pygame.Surface | None = None) -> None:
         self.relx, self.rely = relx, rely
         self.x: float
         self.y: float
         self.xy: pygame.Vector2
         self.z = posz
         self.aligne = aligne
+        self.window = window if window is not None else RelativePos.general_window
+
         self.update()
 
     def update(self):
         """méthode de mise à jour"""
-        self.x = self.relx * RelativePos.window.get_width()
-        self.y = self.rely * RelativePos.window.get_height()
+        self.x = self.relx * self.window.get_width()
+        self.y = self.rely * self.window.get_height()
 
         self.xy = pygame.Vector2(self.x, self.y)
 
@@ -330,7 +340,7 @@ class AnimElement(Element):
 
     def reset_anim(self):
         """reset les animations"""
-        self.seq.fin()
+        self.seq.stop()
 
     def start_anim(self, nom: str):
         """déclenche une animation"""
@@ -381,14 +391,14 @@ class Texte:
     """gestion des textes"""
 
     def __init__(self, pos: pygame.Vector3 | RelativePos, texte: str = "", couleur: str = "#FFFFFF",
-                 background_couleur: str = "#000000", interface_nom: str | None = None, scale: int = 1) -> None:
+                  interface_nom: str | None = None, scale: float = 1) -> None:
         self.pos = pos
         self.texte = texte
         self.couleur = couleur
-        self.background_couleur = background_couleur
         self.scale = scale
+        self.back_surface = pygame.Surface((0, 0), pygame.SRCALPHA)
         surface = POLICE.render(
-            self.texte, True, self.couleur, self.background_couleur)
+            self.texte, True, self.couleur)
         surface = pygame.transform.scale_by(surface, self.scale)
         self.element = Element(
             self, surface, surface.get_rect(), interface_nom)
@@ -396,7 +406,7 @@ class Texte:
     def update(self):
         """mise à jour"""
         surface = POLICE.render(
-            self.texte, True, self.couleur, self.background_couleur)
+            self.texte, True, self.couleur)
         surface = pygame.transform.scale_by(surface, self.scale)
         self.element.surface = surface
         self.element.rect = surface.get_rect()

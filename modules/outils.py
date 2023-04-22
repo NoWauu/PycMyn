@@ -1,5 +1,6 @@
 """module outils"""
 import csv
+import json
 from typing import List, Callable, Dict, Any
 import pygame
 
@@ -13,10 +14,20 @@ pygame.display.set_icon(icon)
 pygame.display.set_caption('PycMyn')
 UNIT_SIZE = 16
 
-with open('ressources/niveaux.csv','r') as file:
+with open('ressources/data/niveaux.csv','r') as file:
     TABLE = list(csv.DictReader(file, delimiter=';'))
 
+with open('ressources/data/save.json', 'r') as file:
+    SAVE = json.load(file)
+
 # fonctions
+
+
+def save():
+    """sauvegarde les données du joueur"""
+    with open('ressources/data/save.json', 'w') as file:
+        json.dump(SAVE, file)
+
 
 def dichotomie(liste: List[float], valeur: float) -> int:
     """
