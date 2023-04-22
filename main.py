@@ -52,7 +52,7 @@ def initialise():
     Background(background, 'menu')
 
     # bouton de lancement du jeux
-    Bouton(RelativePos(0.65, 0.17, 1), pygame.Surface((200, 50), pygame.SRCALPHA),
+    Bouton(RelativePos(0.78, 0.64, 1), pygame.Surface((160, 45), pygame.SRCALPHA),
            play, 'menu')
 
     Interface.current_interface = interface_menu
