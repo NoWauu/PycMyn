@@ -1,3 +1,5 @@
+![logo](/ressources/textures/logo.png)
+
 # PycMyn (Librairie Pygame)
 
 Ce projet a été codé par [UnslaadTovitaan](https://github.com/UnslaadTovitaan) et [NoWauu](https://github.com/NoWauu) pour le projet du troisième trimestre de l'année scolaire 2022-2023 dans la spécialité NSI (Numériques et Sciences Informatiques) en **Python**.
@@ -46,5 +48,7 @@ Fichiers récupérés sur le site [classicgaming.cc](https://classicgaming.cc/cl
 # Licence Pacman
 
 Pacman ® & © 1980-2023 Bandai Namco
+
 Licensed to Bandai Namco
+
 All Rights Reserved
