@@ -8,6 +8,9 @@ pygame.init()
 # constantes
 
 WINDOW = pygame.display.set_mode((1224, 720), pygame.RESIZABLE)
+icon = pygame.image.load('ressources/textures/pacman.png')
+pygame.display.set_icon(icon)
+pygame.display.set_caption('PycMyn')
 UNIT_SIZE = 16
 
 with open('ressources/niveaux.csv','r') as file:
