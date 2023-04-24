@@ -247,11 +247,11 @@ def piege(fantome: Fantome, directions: List[int]):
     coef_dir = 4
     coef_dst = 3
 
-    if player.mem == -1:
+    if player.mouvement_dct['memoire'] == -1:
         return follow(fantome, directions)
 
     vector: pygame.Vector2 = (player.pos.xy + (coef_dir * utl.UNIT_SIZE *
-                                               utl.gen_vector(player.mem) -
+                                               utl.gen_vector(player.mouvement_dct['memoire']) -
                                                fantome.pos.xy))
 
     if vector.length() < utl.UNIT_SIZE * coef_dst:
