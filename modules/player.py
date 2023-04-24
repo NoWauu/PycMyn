@@ -1,4 +1,6 @@
-from typing import Dict, List, Tuple
+"""module de gestion du joueur"""
+
+from typing import Dict, List, Tuple, Any
 
 import pygame
 
@@ -6,47 +8,72 @@ import modules.outils as utl
 from modules import collectable
 from modules.entite import CASE, Entity
 from modules.graphics import Interface, Sequence
-import modules.sounds as sounds
+from modules import sounds
 
 pygame.init()
 
 
 class Player(Entity):
+    """gestion du joueur"""
 
-    def __init__(self, pos: pygame.Vector3, textures: Tuple[pygame.Surface, Dict[str, List[Tuple[pygame.Surface, float]]]],
-                 speed: float) -> None:
+    def __init__(self, pos: pygame.Vector3,
+                 textures: Tuple[pygame.Surface,
+                                 Dict[str, List[Tuple[pygame.Surface, float]]]]) -> None:
         super().__init__(pos, textures)
-        self.id = 2
+        self.rotation: int
+
+        self.idt = 2
         self.reset_pos = pos.xy
         # mouvements
+        self.mouvement_dct: Dict[str, Any] = {
+            'reset_pos': pos.xy,
+            'memoire': 0,
+            'direction': -1,
+            'base_speed': 80,
+            'speed': 80 * float(utl.TABLE[super().niveau if super().niveau <=
+                  20 else 20]['vitesse_pacman']),
+            'deltat': 0,
+            'last_time': 0
+        }
         self.mem: int = 0
         self.direction: int = -1
-        self.base_speed = speed
+        self.base_speed = 80
         self.speed = self.base_speed * \
             float(utl.TABLE[super().niveau if super().niveau <=
                   20 else 20]['vitesse_pacman'])
 
-        self.time_since_last_frame = pygame.time.get_ticks()
+        # timing
+        self.deltat: int
+        self.last_time: int = 0
 
+        # gameplay
+        self.gameplay_dct: Dict[str, Any] = {
+            'health': 3,
+            'points': 0,
+            'eat_bonus': 0
+        }
         self.health = 3
         self.points = 0
         self.eat_bonus = 0
 
         # sounds
-        self.eat_seq = Sequence([((lambda: sounds.EAT_SOUND.play(), []), 0),
-                                 (None, int(sounds.EAT_SOUND.get_length() * 1000 - 215))],
-                                 False)
+        self.eat_seq = Sequence([((sounds.EAT_SOUND.play, []), 0),
+                                 (None, int(sounds.EAT_SOUND.get_length() * 1000 - 215))])
 
     def on_keypress(self, event: pygame.event.Event):
         """méthode de traitement des touches"""
         match event.key:
             case pygame.K_LEFT:
+                self.mouvement_dct['direction'] = 2
                 self.direction = 2
             case pygame.K_RIGHT:
+                self.mouvement_dct['direction'] = 0
                 self.direction = 0
             case pygame.K_UP:
+                self.mouvement_dct['direction'] = 1
                 self.direction = 1
             case pygame.K_DOWN:
+                self.mouvement_dct['direction'] = 3
                 self.direction = 3
             case _:
                 ...
@@ -56,31 +83,24 @@ class Player(Entity):
         if self.direction == -1:
             return
 
-        futur = CASE[self.direction](self.pos.xy, self.speed, self.dt)
+        futur = CASE[self.direction](self.pos.xy, self.speed, self.deltat)
 
         # si la direction indiquée convient on avance
         if (not self.collide_wall(futur) and
-                not any([enit.hard_collide for enit in
-                         self.collide_with(futur)])):
+                not any(enit.hard_collide for enit in
+                         self.collide_with(futur))):
             self.pos.xy = futur
             if self.mem != self.direction:
                 self.mem = self.direction
 
         else:
-            futur = CASE[self.mem](self.pos.xy, self.speed, self.dt)
+            futur = CASE[self.mem](self.pos.xy, self.speed, self.deltat)
             # sinon, on regarde dans la mémoire et si
             # celle ci convient, on avance
             if (not self.collide_wall(futur) and
-                    not any([enit.hard_collide for enit in
-                             self.collide_with(futur)])):
+                    not any(enit.hard_collide for enit in
+                             self.collide_with(futur))):
                 self.pos.xy = futur
-            else:
-                futur = CASE[self.mem](self.pos.xy, 10/self.dt, self.dt)
-                # si on peut tout de même avancer légèrement
-                # on avance de 1 pixel
-                if not self.collide_wall(futur) and not any([enit.hard_collide for enit in
-                         self.collide_with(futur)]):
-                    self.pos.xy = futur
 
     def collect(self, entity: Entity):
         """gestion de la collecte des collectables"""
@@ -92,7 +112,7 @@ class Player(Entity):
 
         elif isinstance(entity, collectable.Fruit):
             points = int(utl.TABLE[super().niveau if super().niveau
-                                                          <= 19 else 20]['points_bonus'])
+                                   <= 19 else 20]['points_bonus'])
             utl.call('add_point', {'point': points})
             self.points += points
             sounds.FRUIT_SOUND.play()
@@ -114,7 +134,7 @@ class Player(Entity):
     def interact(self):
         """gestion des intéractions avec le joueur"""
         for entity in self.collide_with():
-            if entity.id == 0:
+            if entity.idt == 0:
                 ancien = self.points
                 self.collect(entity)
                 entity.destroy()
@@ -122,13 +142,13 @@ class Player(Entity):
                 # s'il n'y a plus de pièce, on gagne
                 if len(collectable.Piece.pieces) == 0:
                     victoire()
-                
-                if self.points >= 10000 and ancien < 10000:
+
+                if self.points >= 10000 > ancien:
                     self.health += 1
                     utl.call('set_vie', {'nombre': self.health})
                     sounds.EXTRA_SOUND.play()
 
-            elif entity.id == 1:
+            elif entity.idt == 1:
                 # cas de collision avec un fantome
                 if entity.fear_state:
                     entity.reset()
@@ -153,8 +173,9 @@ class Player(Entity):
 
     def update(self):
         """met à jour l'entité"""
-        self.dt = pygame.time.get_ticks() - self.time_since_last_frame
-        self.time_since_last_frame = pygame.time.get_ticks()
+        self.deltat = pygame.time.get_ticks() - self.last_time
+        self.last_time = pygame.time.get_ticks()
+
         save_pos = self.pos.xy
         self.controle()
         self.rotation = (self.mem * 90) % 360
@@ -191,7 +212,8 @@ def initialisation():
     """initialisation"""
     # textures
     texture_player = pygame.transform.smoothscale(
-        pygame.image.load("ressources/textures/pacman.png").convert_alpha(), (utl.UNIT_SIZE, utl.UNIT_SIZE))
+        pygame.image.load("ressources/textures/pacman.png").convert_alpha(),
+        (utl.UNIT_SIZE, utl.UNIT_SIZE))
 
     texture_player_2 = pygame.Surface(
         (utl.UNIT_SIZE, utl.UNIT_SIZE), pygame.SRCALPHA)
@@ -200,9 +222,10 @@ def initialisation():
                        (utl.UNIT_SIZE // 2, utl.UNIT_SIZE // 2), utl.UNIT_SIZE // 2)
 
     # entité
-    player = Player(pygame.Vector3(utl.UNIT_SIZE, utl.UNIT_SIZE, 2), (texture_player, {'normal': [(texture_player, 0),
-                                                                                                  (texture_player_2, 200),
-                                                                                                  (texture_player, 200)]}), 1)
+    player = Player(pygame.Vector3(utl.UNIT_SIZE, utl.UNIT_SIZE, 2),
+                    (texture_player, {'normal': [(texture_player, 0),
+                                                 (texture_player_2, 200),
+                                                 (texture_player, 200)]}))
     # événements
     utl.lie('init_entities', player.reset)
     utl.lie('powerup', player.super_pacman)

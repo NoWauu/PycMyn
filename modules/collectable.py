@@ -9,9 +9,11 @@ import modules.outils as utl
 
 pygame.init()
 
+
 class Collectable(Entity):
     """classe de gestion des collectables"""
-    texture = pygame.Surface((utl.UNIT_SIZE, utl.UNIT_SIZE))  # texture par défaut
+    texture = pygame.Surface((utl.UNIT_SIZE, utl.UNIT_SIZE))
+    # texture par défaut
 
     def __init__(self, position: pygame.Vector3) -> None:
         super().__init__(
@@ -30,6 +32,7 @@ class Collectable(Entity):
 class Piece(Collectable):
     """classe de gestion des pièces"""
     pieces: Set['Piece'] = set()
+
     def __init__(self, position: pygame.Vector3) -> None:
         super().__init__(position)
         Piece.pieces.add(self)
@@ -40,7 +43,7 @@ class Piece(Collectable):
 
 
 class Fruit(Collectable):
-    """classe de gestion des Pommes"""
+    """classe de gestion des Fruits"""
 
     def __init__(self, position: pygame.Vector3) -> None:
         super().__init__(position)
@@ -78,19 +81,20 @@ def get_empty_placement(scheme: pygame.mask.Mask) -> Set[Tuple[int, int]]:
 def populate(surface: pygame.Surface):
     """place les pièces sur le plateaux"""
     mask = utl.forme_mask(surface, utl.UNIT_SIZE)
-    mask.draw(pygame.mask.from_surface(pygame.image.load('ressources/textures/fantome_map.png')), (0, 0))
+    mask.draw(pygame.mask.from_surface(pygame.image.load('ressources/textures/fantome_map.png')),
+              (0, 0))
     empty_placement = get_empty_placement(mask)
 
     pommes_pos = choose_pos(4, empty_placement)
     super_pos = choose_pos(4, empty_placement)
-    
+
     for pos in pommes_pos:
         Fruit(pygame.Vector3(pos[0] * utl.UNIT_SIZE,
-                pos[1] * utl.UNIT_SIZE, 1))
+                             pos[1] * utl.UNIT_SIZE, 1))
 
     for pos in super_pos:
         Super(pygame.Vector3(pos[0] * utl.UNIT_SIZE,
-               pos[1] * utl.UNIT_SIZE, 1))
+                             pos[1] * utl.UNIT_SIZE, 1))
 
     # pièces
 
@@ -99,21 +103,26 @@ def populate(surface: pygame.Surface):
     for pos in piece_spot:
         if pos in empty_placement:
             Piece(pygame.Vector3(pos[0] * utl.UNIT_SIZE,
-                   pos[1] * utl.UNIT_SIZE, 1))
+                                 pos[1] * utl.UNIT_SIZE, 1))
 
 # setup
 
-texture_piece = pygame.Surface((utl.UNIT_SIZE, utl.UNIT_SIZE), pygame.SRCALPHA)
-pygame.draw.circle(texture_piece, (250, 198, 53), (utl.UNIT_SIZE // 2, utl.UNIT_SIZE // 2), 3)
+
+texture_piece = pygame.Surface((utl.UNIT_SIZE, utl.UNIT_SIZE),
+                               pygame.SRCALPHA)
+pygame.draw.circle(texture_piece, (250, 198, 53),
+                   (utl.UNIT_SIZE // 2, utl.UNIT_SIZE // 2), 3)
 
 nom_fruit = utl.TABLE[Fruit.niveau if Fruit.niveau <=
-                  20 else 20]['bonus']
+                      20 else 20]['bonus']
 
 texture_fruit = pygame.transform.scale(
-    pygame.image.load(f"ressources/textures/{nom_fruit}.png").convert_alpha(), (utl.UNIT_SIZE, utl.UNIT_SIZE))
+    pygame.image.load(f"ressources/textures/{nom_fruit}.png").convert_alpha(),
+    (utl.UNIT_SIZE, utl.UNIT_SIZE))
 
 texture_super = pygame.Surface((utl.UNIT_SIZE, utl.UNIT_SIZE), pygame.SRCALPHA)
-pygame.draw.circle(texture_super, (255, 255, 255), (utl.UNIT_SIZE // 2, utl.UNIT_SIZE // 2), 6)
+pygame.draw.circle(texture_super, (255, 255, 255),
+                   (utl.UNIT_SIZE // 2, utl.UNIT_SIZE // 2), 6)
 
 Piece.settexture(texture_piece)
 Fruit.settexture(texture_fruit)

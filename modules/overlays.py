@@ -10,7 +10,8 @@ pygame.init()
 class Compteur:
     """classe compteur"""
 
-    def __init__(self, pos: pygame.Vector3 | RelativePos, interface_nom: str, base: str = '') -> None:
+    def __init__(self, pos: pygame.Vector3 | RelativePos,
+                 interface_nom: str, base: str = '') -> None:
         self.points = 0
         self.base = base
         self.texte = Texte(pos, interface_nom=interface_nom)
@@ -20,7 +21,6 @@ class Compteur:
         """incrémente le compteur de points"""
         self.points += point
         self.update_texte()
-        
 
     def vide(self):
         """réinitialise le compteur de points"""
@@ -35,7 +35,8 @@ class Compteur:
 class HealthBar:
     """représentation de la barre de vie"""
 
-    def __init__(self, pos: RelativePos | pygame.Vector3, unit_texture: pygame.Surface, repetition: int = 1, interface_nom: str | None = None) -> None:
+    def __init__(self, pos: RelativePos | pygame.Vector3, unit_texture: pygame.Surface,
+                 repetition: int = 1, interface_nom: str | None = None) -> None:
         self.pos = pos
         self.width = unit_texture.get_width()
         self.unit_texture = unit_texture
@@ -65,26 +66,29 @@ class HealthBar:
 
 
 class DtRenderer:
+    """représentation du compteur de ms"""
 
-    def __init__(self, pos: RelativePos | pygame.Vector3, interface_nom: str | None = None) -> None:
+    def __init__(self, pos: RelativePos | pygame.Vector3,
+                 interface_nom: str | None = None) -> None:
         self.pos = pos
         self.texte = Texte(pos, interface_nom=interface_nom)
         self.element = Element(self, pygame.Surface(
             (0, 0)), pygame.Rect(0, 0, 0, 0), interface_nom)
-        self.dt = 0
+        self.deltat = 0
         self.time = pygame.time.get_ticks()
 
     def update(self):
-        self.dt = pygame.time.get_ticks() - self.time
+        """mise à jour"""
+        self.deltat = pygame.time.get_ticks() - self.time
         self.time = pygame.time.get_ticks()
-        self.texte.texte = str(self.dt)
+        self.texte.texte = str(self.deltat)
 
 
 class Timer:
     """représentation d'un timer"""
 
     def __init__(self, pos: pygame.Vector3 | RelativePos, interface_nom: str) -> None:
-        self.compteur = Compteur(pos, interface_nom, base= 'Temps: {value} s')
+        self.compteur = Compteur(pos, interface_nom, base='{value} s')
         self.temps = 0
 
         self.time_seq = Sequence(
@@ -108,17 +112,23 @@ class Timer:
         return self.compteur.points
 
 
-class Background:
+class StaticTexture:
     """classe de représentation de fond"""
 
-    def __init__(self, texture: pygame.Surface, interface_nom: str | None = None) -> None:
-        self.pos = pygame.Vector3(0, 0, 0)
+    def __init__(self, texture: pygame.Surface,
+                 pos: pygame.Vector3 | RelativePos = pygame.Vector3(0, 0, 0),
+                 mask: pygame.Mask = pygame.Mask((0, 0)),
+                 interface_nom: str | None = None) -> None:
+        self.pos = pos
 
         self.element = StaticElement(
-            self, texture, pygame.Mask((0, 0)), interface_nom)
+            self, texture, mask, interface_nom)
 
     def on_video_resize(self):
         """ajuste la texture à la fenêtre"""
-        self.element.surface = pygame.transform.scale_by(self.element.surface, max(utl.WINDOW.get_width(
-        ) / self.element.surface.get_width(), utl.WINDOW.get_height() / self.element.surface.get_height()))
+        self.element.surface = pygame.transform.scale_by(self.element.surface,
+                                                         (max(utl.WINDOW.get_width()/
+                                                              self.element.surface.get_width(),
+                                                              utl.WINDOW.get_height() /
+                                                              self.element.surface.get_height())))
         self.element.rect = self.element.surface.get_rect()

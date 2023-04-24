@@ -24,7 +24,9 @@ class Sequence:
     """classe de gestion des séquences"""
     sequences: List['Sequence'] = []
 
-    def __init__(self, seq: List[Tuple[Tuple[Callable[..., None], List[Any]] | None, float]], loop: bool = False, local: bool = False) -> None:
+    def __init__(self, seq: List[Tuple[Tuple[Callable[..., None],
+                                             List[Any]] | None, float]],
+                 loop: bool = False, local: bool = False) -> None:
 
         self.fnct: List[Tuple[Callable[..., None], List[Any]] | None] = []
         self.times: List[float] = []
@@ -144,6 +146,7 @@ class Interface:
                 elm.objet.on_video_resize()
 
     def update(self):
+        """mise à jour"""
         for elm in self.elements:
             if hasattr(elm, 'objet') and hasattr(elm.objet, 'update'):
                 elm.objet.update()
@@ -237,7 +240,8 @@ class Element:
 
     def render(self):
         """méthode d'affichage"""
-        return (self.surface, self.rect) if self.enabled else (pygame.Surface((0, 0)), pygame.Rect(0, 0, 0,0))
+        return ((self.surface, self.rect) if self.enabled
+                else (pygame.Surface((0, 0)), pygame.Rect(0, 0, 0, 0)))
 
 
 class Frame:
@@ -248,12 +252,15 @@ class Frame:
 
     frames: Dict[str, 'Frame'] = {}
 
-    def __init__(self, nom: str, interface: Interface, surface: pygame.Surface, pos: 'pygame.Vector3 | RelativePos', interface_nom: str | None = None) -> None:
+    def __init__(self, nom: str, interface: Interface, surface: pygame.Surface,
+                 pos: 'pygame.Vector3 | RelativePos',
+                 interface_nom: str | None = None) -> None:
         self.surface = surface
         self.rect = self.surface.get_rect()
         self.pos = pos
         self.interface = interface
-        self.element = Element(self, self.surface.copy(), self.rect, interface_nom, False)
+        self.element = Element(self, self.surface.copy(),
+                               self.rect, interface_nom, False)
 
         if nom not in Frame.frames:
             Frame.frames[nom] = self
@@ -284,8 +291,12 @@ class RelativePos:
     """
     general_window: pygame.Surface
 
-    def __init__(self, relx: float, rely: float, posz: int, aligne: str = 'centre', window: pygame.Surface | None = None) -> None:
+    def __init__(self, relx: float, rely: float, posz: int, aligne: str = 'centre',
+                 window: pygame.Surface | None = None) -> None:
         self.relx, self.rely = relx, rely
+        # ces noms ont été choisi
+        # pour être compatible avec les vecteurs
+        # de pygame
         self.x: float
         self.y: float
         self.xy: pygame.Vector2
@@ -306,15 +317,16 @@ class RelativePos:
 class StaticElement(Element):
     """création d'un modèle immuable"""
 
-    def __init__(self, objet: Any, surface: pygame.Surface, mask: pygame.Mask | None = None, interface_nom: str | None = None) -> None:
+    def __init__(self, objet: Any, surface: pygame.Surface,
+                 mask: pygame.Mask | None = None, interface_nom: str | None = None) -> None:
         super().__init__(objet, surface, surface.get_rect(), interface_nom, mask is None)
         self.ancre()
         if mask is not None:
             self.mask = mask
 
     def update(self):
-        """surécrit la méthode pour la désactiver"""
-        ...
+        """surécrit la méthode"""
+        return
 
 
 class AnimElement(Element):
@@ -345,7 +357,8 @@ class AnimElement(Element):
     def start_anim(self, nom: str):
         """déclenche une animation"""
         self.seq = Sequence(
-            [((self.set_current_texture, [tpl[0]]), tpl[1]) for tpl in self.textures[nom]])
+            [((self.set_current_texture, [tpl[0]]), tpl[1])
+             for tpl in self.textures[nom]])
         self.seq.start()
 
     def check_next_anim(self) -> Tuple[pygame.Surface, bool]:
@@ -373,13 +386,14 @@ class AnimElement(Element):
 class Bouton:
     """classe de représentation d'un bouton"""
 
-    def __init__(self, pos: pygame.Vector3 | RelativePos, surface: pygame.Surface, fnct: Callable[[], None],
-                 interface_nom: str | None = None, click: int = 1) -> None:
+    def __init__(self, pos: pygame.Vector3 | RelativePos,
+                 surface: pygame.Surface, fnct: Callable[[], None],
+                 interface_nom: str | None = None) -> None:
         self.pos = pos
         self.element = Element(
             self, surface, surface.get_rect(), interface_nom, False)
         self.fnct = fnct
-        self.click = click
+        self.click = 1
 
     def on_click(self, event: pygame.event.Event):
         """active lors du clique"""
@@ -390,8 +404,9 @@ class Bouton:
 class Texte:
     """gestion des textes"""
 
-    def __init__(self, pos: pygame.Vector3 | RelativePos, texte: str = "", couleur: str = "#FFFFFF",
-                  interface_nom: str | None = None, scale: float = 1) -> None:
+    def __init__(self, pos: pygame.Vector3 | RelativePos, texte: str = "",
+                 couleur: str = "#FFFFFF",
+                 interface_nom: str | None = None, scale: float = 1) -> None:
         self.pos = pos
         self.texte = texte
         self.couleur = couleur

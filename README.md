@@ -34,6 +34,7 @@ Les fichiers sont open source et trouvés sur internet ou dessinés par [Unslaad
 - [stun.png](https://github.com/NoWauu/PycMyn/blob/main/ressources/textures/stun.png)
 - [stun2.png](https://github.com/NoWauu/PycMyn/blob/main/ressources/textures/stun2.png)
 - [victoire.png](https://github.com/NoWauu/PycMyn/blob/main/ressources/textures/victoire.png)
+- [montre.png](https://github.com/NoWauu/PycMyn/blob/main/ressources/textures/montre.png)
 
 # Fichiers son utilisés (dans ./ressources/sounds/)
 
