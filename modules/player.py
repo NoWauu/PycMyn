@@ -92,7 +92,7 @@ class Player(Entity):
         if isinstance(entity, collectable.Piece):
             utl.call('add_point', {'point': 1})
             self.gameplay_dct['points'] += 1
-            if not self.eat_seq.is_running:
+            if not self.eat_seq.sequence_infos['is_running']:
                 self.eat_seq.start()
 
         elif isinstance(entity, collectable.Fruit):
@@ -167,7 +167,7 @@ class Player(Entity):
         self.controle()
         self.rotation = (self.mouvement_dct['memoire'] * 90) % 360
 
-        if save_pos != self.pos.xy and not self.animation.seq.is_running:
+        if save_pos != self.pos.xy and not self.animation.seq.sequence_infos['is_running']:
             self.animation.start_anim('normal')
 
         self.interact()
@@ -190,6 +190,11 @@ def defaite():
     utl.call('defaite', {'able': True})
     utl.call('fin_partie', {})
     Interface.change_interface('fin_partie')
+
+
+def save_progresse():
+    """sauvegarde le dernier niveau joué"""
+    utl.SAVE['niveau_sauvegarde'] = Entity.niveau
 
 
 # setup

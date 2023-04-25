@@ -35,6 +35,11 @@ def gen_vector(direction: int):
                           (direction % 2 == 1) * ((direction // 2) * 2 - 1))
 
 
+def set_dct(dictionnaire: Dict[str, Any], clef: str, valeur: Any):
+    """change la valeur du dictionnaire à la clef donnée"""
+    dictionnaire[clef] = valeur
+
+
 def dichotomie(liste: List[float], valeur: float) -> int:
     """
     renvoie l'index d'une liste

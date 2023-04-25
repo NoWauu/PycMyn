@@ -29,12 +29,12 @@ def retour_menu():
     Interface.change_interface('menu')
 
 
-def set_meilleur_temps(temps: int, meilleur_temps: int):
+def set_meilleur_niveau(niveau: int, meilleur_niveau: int):
     """remplace le meilleur temps"""
-    if temps < meilleur_temps or meilleur_temps == 0:
-        utl.SAVE['meilleur_temps'] = temps
-        return temps
-    return meilleur_temps
+    if niveau < meilleur_niveau or meilleur_niveau == 0:
+        utl.SAVE['meilleur_niveau'] = niveau
+        return niveau
+    return meilleur_niveau
 
 
 def play():
@@ -167,18 +167,18 @@ def initialise_end_zone():
     defaite_fin.element.able(able=False)
     utl.lie('defaite', defaite_fin.element.able)
 
-    # meilleur temps
-    meilleur_temps = str(utl.SAVE['meilleur_temps']) + \
-        ' s' if utl.SAVE['meilleur_temps'] != 0 else 'Aucun'
+    # meilleur niveau
+    meilleur_niveau = str(utl.SAVE['meilleur_niveau'] + 1)
 
-    meilleur_temps_texte = Texte(RelativePos(0.5, 0.9, 1, aligne='bottom'),
-                                 texte=f'meilleur temps: {meilleur_temps}',
+    meilleur_niveau_texte = Texte(RelativePos(0.5, 0.9, 1, aligne='bottom'),
+                                 texte=f'meilleur niveau: {meilleur_niveau}',
                                  couleur='#0000FF', scale=1.8, interface_nom='fin_partie')
+    # cette fonction sera exécutée après l'augmentation du niveau
     utl.lie('fin_partie',
-            lambda **args: setattr(meilleur_temps_texte, 'texte',
-                                   'meilleur temps: {} s'.format(str(
-                                       set_meilleur_temps(timer.get_temps(),
-                                                          utl.SAVE['meilleur_temps']))))
+            lambda **args: setattr(meilleur_niveau_texte, 'texte',
+                                   'meilleur niveau: {} s'.format(str(
+                                       set_meilleur_niveau(entite.Entity.niveau,
+                                                          utl.SAVE['meilleur_niveau']) + 1)))
             if victoire_background.element.enabled else None)
 
 
@@ -241,4 +241,5 @@ while running:
     # soit moins de 20 ms
     clock.tick(60)  # 60 fps
 
+player.save_progresse()
 utl.save()

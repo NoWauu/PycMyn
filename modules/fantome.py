@@ -5,7 +5,7 @@ from typing import Tuple, List, Dict, Callable
 
 import pygame
 
-from modules.graphics import Sequence
+from modules.graphics import Sequence, vect2_to_tuple
 import modules.outils as utl
 from modules.entite import Entity, CASE
 
@@ -60,6 +60,7 @@ class Fantome(Entity):
     def reset(self):
         """reset le fantome lors de sa mort"""
         self.pos.xy = self.start_pos
+        self.animation.rect.topleft = vect2_to_tuple(self.pos.xy)
         self.set_fear(False)
         self.animation.reset_anim()
         self.direction = 1
@@ -178,7 +179,7 @@ class Fantome(Entity):
 
         self.fear_seq.step()
 
-        if self.fear_state and not self.animation.seq.is_running:
+        if self.fear_state and not self.animation.seq.sequence_infos['is_running']:
             self.animation.start_anim('fear_blink')
 
 
@@ -230,6 +231,9 @@ def evite(fantome: Fantome, directions: List[int]):
     """évite pacman"""
     player = find_joueur()
     vector = player.pos.xy - fantome.pos.xy
+
+    if vector.length() > 5 * utl.UNIT_SIZE:
+        return aleatoire(fantome, directions)
 
     direct = vector.normalize()
     produits_scalaires = [utl.gen_vector(

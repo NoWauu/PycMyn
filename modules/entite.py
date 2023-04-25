@@ -59,7 +59,7 @@ class Entity:
     plateau: StaticTexture
     group: List['Entity'] = []
 
-    niveau = 0
+    niveau = utl.SAVE['niveau_sauvegarde']
 
     def __init__(self, pos: pygame.Vector3,
                  anim_infos: Tuple[pygame.Surface,

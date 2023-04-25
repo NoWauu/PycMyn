@@ -2,7 +2,7 @@
 from typing import List, Any, Tuple, Dict, Callable
 import pygame
 
-from modules.outils import dichotomie, forme_mask, UNIT_SIZE
+from modules.outils import dichotomie, forme_mask, UNIT_SIZE, set_dct
 
 pygame.init()
 
@@ -28,61 +28,64 @@ class Sequence:
                                              List[Any]] | None, float]],
                  loop: bool = False, local: bool = False) -> None:
 
-        self.fnct: List[Tuple[Callable[..., None], List[Any]] | None] = []
-        self.times: List[float] = []
-        self.is_running = False
+        self.sequence_infos: Dict[str, Any] = {
+            'fnct': [],
+            'times': [],
+            'is_running': False,
+            'pointer': 0,
+            'loop': loop,
+            'local': local
+        }
         self.sqc_timer = pygame.time.get_ticks()
-        self.pointer = 0
-        self.loop = loop
-        self.local = local
 
         self.pause_seq: Sequence | None = None
 
         for elm in seq:
-            self.fnct.append(elm[0])
-            self.times.append(elm[1])
+            self.sequence_infos['fnct'].append(elm[0])
+            self.sequence_infos['times'].append(elm[1])
 
         if local:
             Sequence.sequences.append(self)
 
     def start(self):
         """commence la séquence"""
-        self.is_running = True
-        self.pointer = 0
+        self.sequence_infos['is_running'] = True
+        self.sequence_infos['pointer'] = 0
         self.sqc_timer = pygame.time.get_ticks()
 
     def stop(self):
         """met fin à la séquence"""
-        self.is_running = False
+        self.sequence_infos['is_running'] = False
 
     def pause(self, temps: int):
         """effectue une pause dans la séquence"""
-        self.is_running = False
+        self.sequence_infos['is_running'] = False
         self.pause_seq = Sequence(
-            [((lambda: setattr(self, 'is_running', True), []), temps)])
+            [((set_dct, [self.sequence_infos, 'is_running', True]), temps)])
         self.pause_seq.start()
 
     def step(self):
         """met à jour la séquence"""
-        if self.pause_seq is not None and self.pause_seq.is_running:
+        if self.pause_seq is not None and self.pause_seq.sequence_infos['is_running']:
             self.pause_seq.step()
             return False
 
-        if not self.is_running or (self.times[self.pointer] >
-                                   pygame.time.get_ticks() - self.sqc_timer):
+        if (not self.sequence_infos['is_running'] or
+            (self.sequence_infos['times'][self.sequence_infos['pointer']] >
+                                   pygame.time.get_ticks() - self.sqc_timer)):
             return False
 
-        fnct = self.fnct[self.pointer]
+        fnct = self.sequence_infos['fnct'][self.sequence_infos['pointer']]
         if fnct is not None:
             fnct[0](*fnct[1])
-        self.pointer += 1
+        self.sequence_infos['pointer'] += 1
         self.sqc_timer = pygame.time.get_ticks()
 
-        if self.pointer >= len(self.times):
-            if self.loop:
+        if self.sequence_infos['pointer'] >= len(self.sequence_infos['times']):
+            if self.sequence_infos['loop']:
                 self.start()
             else:
-                self.is_running = False
+                self.sequence_infos['is_running'] = False
         return True
 
     def destroy(self):
@@ -96,7 +99,8 @@ class Sequence:
         a_detruire: List['Sequence'] = []
         for seq in cls.sequences:
             seq.step()
-            if seq.local and not seq.is_running and not seq.loop:
+            if (seq.sequence_infos['local'] and not seq.sequence_infos['is_running']
+                and not seq.sequence_infos['loop']):
                 a_detruire.append(seq)
 
         while len(a_detruire) > 0:
@@ -212,7 +216,7 @@ class Element:
         ancre = 'topleft'
 
         if isinstance(self.pos, RelativePos):
-            ancre = self.pos.aligne
+            ancre = self.pos.aligne_infos['aligne']
 
         self.rect.center = vect2_to_tuple(self.pos.xy)
         if 'top' in ancre:
@@ -293,25 +297,33 @@ class RelativePos:
 
     def __init__(self, relx: float, rely: float, posz: int, aligne: str = 'centre',
                  window: pygame.Surface | None = None) -> None:
-        self.relx, self.rely = relx, rely
+        self.rel_infos: Dict[str, Any] = {
+            'relx': relx,
+            'rely': rely
+        }
         # ces noms ont été choisi
         # pour être compatible avec les vecteurs
         # de pygame
         self.x: float
         self.y: float
-        self.xy: pygame.Vector2
         self.z = posz
-        self.aligne = aligne
-        self.window = window if window is not None else RelativePos.general_window
+
+        self.aligne_infos: Dict[str, Any] = {
+            'aligne': aligne,
+            'window': window if window is not None else RelativePos.general_window
+        }
 
         self.update()
 
+    @property
+    def xy(self):
+        """renvoie la composante xy du vecteur"""
+        return pygame.Vector2(self.x, self.y)
+
     def update(self):
         """méthode de mise à jour"""
-        self.x = self.relx * self.window.get_width()
-        self.y = self.rely * self.window.get_height()
-
-        self.xy = pygame.Vector2(self.x, self.y)
+        self.x = self.rel_infos['relx'] * self.aligne_infos['window'].get_width()
+        self.y = self.rel_infos['rely'] * self.aligne_infos['window'].get_height()
 
 
 class StaticElement(Element):
@@ -365,7 +377,7 @@ class AnimElement(Element):
         """si le temps lié à l'animation est écoulé,
         passe à la texture suivante"""
         change = False
-        if self.seq.is_running:
+        if self.seq.sequence_infos['is_running']:
             change = self.seq.step()
         else:
             change = self.current_texture != self.default_texture
