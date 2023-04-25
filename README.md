@@ -25,6 +25,7 @@ Les fichiers sont open source et trouvés sur internet ou dessinés par [Unslaad
 - [fantome_map.png](https://github.com/NoWauu/PycMyn/blob/main/ressources/textures/fantome_map.png)
 - [fraise.png](https://github.com/NoWauu/PycMyn/blob/main/ressources/textures/fraise.png)
 - [inky.png](https://github.com/NoWauu/PycMyn/blob/main/ressources/textures/inky.png)
+- [map.png](https://github.com/NoWauu/PycMyn/blob/main/ressources/textures/map.png)
 - [orange.png](https://github.com/NoWauu/PycMyn/blob/main/ressources/textures/orange.png)
 - [Originalpacmaze.png](https://github.com/NoWauu/PycMyn/blob/main/ressources/textures/Originalpacmaze.png)
 - [pacman.png](https://github.com/NoWauu/PycMyn/blob/main/ressources/textures/pacman.png)
