@@ -1,5 +1,5 @@
 ![trpNSI](/ressources/textures/trophees-nsi-logo-orange.png )
-![logo](/ressources/textures/logo.png)
+<img align="left" width="100" height="100" src="/ressources/textures/logo.png">
 
 # PycMyn (Librairie Pygame)
 
