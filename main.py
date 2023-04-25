@@ -3,8 +3,8 @@ from typing import List
 
 import pygame
 
-from modules import fantome
 import modules.outils as utl
+from modules import fantome
 from modules import player
 from modules import collectable, entite, plateau
 from modules.graphics import (
@@ -66,7 +66,7 @@ def initialise_menu():
 
     # bouton de lancement du jeux
     Bouton(RelativePos(0.78, 0.64, 1), pygame.Surface((160, 45), pygame.SRCALPHA),
-           play, 'menu')
+        play, 'menu')
 
     Interface.change_interface('menu')
 
@@ -76,7 +76,7 @@ def initialise_game_zone():
     # définition de la zone de jeux
     Interface('jeux')
     Frame('plateau', Interface('plateau'), pygame.Surface((448, 496)),
-          RelativePos(0.5, 0.5, 0), 'jeux')
+        RelativePos(0.5, 0.5, 0), 'jeux')
 
     DtRenderer(RelativePos(1, 1, 1, aligne='bottomright'), 'jeux')
 
@@ -105,8 +105,8 @@ def initialise_game_zone():
 
     # niveaux
     texte_niveau = Texte(RelativePos(0.5, 0, 1, aligne='top'),
-                         f'niveau: {entite.Entity.niveau + 1}',
-                         couleur='#0090FF', scale=2, interface_nom='jeux')
+                        f'niveau: {entite.Entity.niveau + 1}',
+                        couleur='#0090FF', scale=2, interface_nom='jeux')
     utl.lie('inc_niveau', lambda niveau: setattr(
         texte_niveau, 'texte', f'niveau: {niveau + 1}'))
     utl.lie('inc_niveau', entite.Entity.set_niveau)
@@ -125,9 +125,9 @@ def initialise_end_zone():
         'ressources/textures/montre.png').convert_alpha()
     montre_texture = pygame.transform.scale(montre_texture, (70, 70))
     StaticTexture(montre_texture, pos=RelativePos(0, 0.5, 1, aligne='left',
-                  window=Frame.get_surface_by_name('topleft')), interface_nom='topleft')
+                window=Frame.get_surface_by_name('topleft')), interface_nom='topleft')
     timer = Timer(RelativePos(1, 0.5, 1, aligne='right',
-                  window=Frame.get_surface_by_name('topleft')), 'topleft')
+                window=Frame.get_surface_by_name('topleft')), 'topleft')
     utl.lie('init_partie', timer.start)
     utl.lie('fin_partie', timer.stop)
 
@@ -141,13 +141,13 @@ def initialise_end_zone():
     victoire_background.element.able(able=False)
 
     victoire_fin = Bouton(RelativePos(0.52, 0.68, 2),
-                          pygame.Surface((300, 35), pygame.SRCALPHA),
-                          retour_menu, interface_nom='fin_partie')
+                        pygame.Surface((300, 35), pygame.SRCALPHA),
+                        retour_menu, interface_nom='fin_partie')
     victoire_fin.element.able(able=False)
 
     victoire_suivant = Bouton(RelativePos(0.51, 0.51, 2),
-                              pygame.Surface((390, 60), pygame.SRCALPHA),
-                              play, interface_nom='fin_partie')
+                            pygame.Surface((390, 60), pygame.SRCALPHA),
+                            play, interface_nom='fin_partie')
     victoire_suivant.element.able(able=False)
 
     utl.lie('victoire', victoire_fin.element.able)
@@ -162,8 +162,8 @@ def initialise_end_zone():
     defaite_background.element.able(able=False)
 
     defaite_fin = Bouton(RelativePos(0.52, 0.7, 2),
-                         pygame.Surface((720, 50), pygame.SRCALPHA),
-                         retour_menu, interface_nom='fin_partie')
+                        pygame.Surface((720, 50), pygame.SRCALPHA),
+                        retour_menu, interface_nom='fin_partie')
     defaite_fin.element.able(able=False)
     utl.lie('defaite', defaite_fin.element.able)
 
@@ -171,14 +171,14 @@ def initialise_end_zone():
     meilleur_niveau = str(utl.SAVE['meilleur_niveau'] + 1)
 
     meilleur_niveau_texte = Texte(RelativePos(0.5, 0.9, 1, aligne='bottom'),
-                                 texte=f'meilleur niveau: {meilleur_niveau}',
-                                 couleur='#0000FF', scale=1.8, interface_nom='fin_partie')
+                                texte=f'meilleur niveau: {meilleur_niveau}',
+                                couleur='#0000FF', scale=1.8, interface_nom='fin_partie')
     # cette fonction sera exécutée après l'augmentation du niveau
     utl.lie('fin_partie',
             lambda **args: setattr(meilleur_niveau_texte, 'texte',
-                                   'meilleur niveau: {} s'.format(str(
-                                       set_meilleur_niveau(entite.Entity.niveau,
-                                                          utl.SAVE['meilleur_niveau']) + 1)))
+                                'meilleur niveau: {} s'.format(str(
+                                    set_meilleur_niveau(entite.Entity.niveau,
+                                                        utl.SAVE['meilleur_niveau']) + 1)))
             if victoire_background.element.enabled else None)
 
 

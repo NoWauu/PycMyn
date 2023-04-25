@@ -183,7 +183,6 @@ class Fantome(Entity):
 
         self.seq.step()
         self.controle()
-        print(self.mouvement_dct['direction'])
 
         self.fear_seq.step()
 

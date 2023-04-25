@@ -1,7 +1,7 @@
 """module outils"""
 import csv
 import json
-from typing import List, Callable, Dict, Any
+from typing import Any, Callable, Dict, List
 import pygame
 
 pygame.init()
