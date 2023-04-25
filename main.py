@@ -41,7 +41,7 @@ def play():
     """lance une partie"""
     # initialisation du terrain
     entite.clear()
-    collectable.populate(entite.Entity.plateau.element.surface)
+    collectable.populate(entite.Entity.plateau.element.info_dct['surface'])
 
     player.initialisation()
     fantome.initialisation()

@@ -60,7 +60,7 @@ class Fantome(Entity):
     def reset(self):
         """reset le fantome lors de sa mort"""
         self.pos.xy = self.start_pos
-        self.animation.rect.topleft = vect2_to_tuple(self.pos.xy)
+        self.animation.info_dct['rect'].topleft = vect2_to_tuple(self.pos.xy)
         self.set_fear(False)
         self.animation.reset_anim()
         self.direction = 1
@@ -95,7 +95,7 @@ class Fantome(Entity):
     def controle(self) -> None:
         """gestion du déplacement d'une entité"""
         # le fantome ne peut que sortir de la zone
-        if (0 < self.animation.rect.centerx < Fantome.fantome_map.get_size()[0] and
+        if (0 < self.animation.info_dct['rect'].centerx < Fantome.fantome_map.get_size()[0] and
                 Fantome.fantome_map.overlap(self.animation.mask,
                                             self.animation.pos.xy) is not None):
             self.has_hard_collide = False

@@ -79,14 +79,14 @@ class Entity:
         Entity.group.remove(self)
         lis: List['Entity'] = []
 
-        save_pos = self.animation.rect.topleft
+        save_pos = self.animation.info_dct['rect'].topleft
         if point is not None:
-            self.animation.rect.topleft = vect2_to_tuple(point)
+            self.animation.info_dct['rect'].topleft = vect2_to_tuple(point)
         for enit in Entity.group:
-            if enit.animation.rect.colliderect(self.animation.rect):
+            if enit.animation.info_dct['rect'].colliderect(self.animation.info_dct['rect']):
                 lis.append(enit)
         if point is not None:
-            self.animation.rect.topleft = save_pos
+            self.animation.info_dct['rect'].topleft = save_pos
 
         Entity.group.append(self)
         return lis
@@ -96,7 +96,7 @@ class Entity:
         # on utilise (-pos.x, -pos.y) car le coin supérieur gauche du masque
         # est considéré comme étant (0, 0). Le masque des murs est par conséquent décalé.
         # on doit donc le recentré
-        return Entity.plateau.element.mask.overlap(self.animation.mask,
+        return Entity.plateau.element.info_dct['mask'].overlap(self.animation.info_dct['mask'],
                                                    (pos.x + utl.UNIT_SIZE,
                                                     pos.y + utl.UNIT_SIZE)) is not None
 

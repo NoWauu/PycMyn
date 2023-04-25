@@ -134,26 +134,26 @@ class Interface:
     def on_keypress(self, event: pygame.event.Event):
         """gère les touches appuyées"""
         for elm in self.elements:
-            if hasattr(elm.objet, 'on_keypress'):
-                elm.objet.on_keypress(event)
+            if hasattr(elm.info_dct['objet'], 'on_keypress'):
+                elm.info_dct['objet'].on_keypress(event)
 
     def on_click(self, event: pygame.event.Event):
         """gestion des cliques"""
         for elm in self.elements:
-            if elm.enabled and hasattr(elm.objet, 'on_click'):
-                elm.objet.on_click(event)
+            if elm.enabled and hasattr(elm.info_dct['objet'], 'on_click'):
+                elm.info_dct['objet'].on_click(event)
 
     def on_video_resize(self):
         """réaction au changement de la taille de la fenêtre"""
         for elm in self.elements:
-            if hasattr(elm.objet, 'on_video_resize'):
-                elm.objet.on_video_resize()
+            if hasattr(elm.info_dct['objet'], 'on_video_resize'):
+                elm.info_dct['objet'].on_video_resize()
 
     def update(self):
         """mise à jour"""
         for elm in self.elements:
-            if hasattr(elm, 'objet') and hasattr(elm.objet, 'update'):
-                elm.objet.update()
+            if hasattr(elm.info_dct['objet'], 'update'):
+                elm.info_dct['objet'].update()
             if hasattr(elm, 'update'):
                 elm.update()
 
@@ -182,14 +182,16 @@ class Element:
 
     def __init__(self, objet: Any, surface: pygame.Surface, rectangle: pygame.Rect,
                  interface_nom: str | None = None, need_forming: bool = False) -> None:
-        self.need_forming = need_forming
-        self.surface = surface
-        self.mask = (forme_mask(surface, UNIT_SIZE)
+        self.info_dct: Dict[str, Any] = {
+            'need_forming': need_forming,
+            'objet': objet,
+            'surface': surface,
+            'rect': rectangle,
+            'mask': (forme_mask(surface, UNIT_SIZE)
                      if need_forming else pygame.mask.from_surface(surface))
-        self.rect = rectangle
-        self.objet = objet
+        }
         self.backup_rotation = 0
-        self.pos: pygame.Vector3 | RelativePos = self.objet.pos
+        self.pos: pygame.Vector3 | RelativePos = self.info_dct['objet'].pos
         self.interface: Interface
 
         self.enabled = True
@@ -212,21 +214,21 @@ class Element:
     def ancre(self):
         """ancre le rectangle à la bonne position"""
         # cas où l'élément n'est pas encore lié
-        self.pos: pygame.Vector3 | RelativePos = self.objet.pos
+        self.pos: pygame.Vector3 | RelativePos = self.info_dct['objet'].pos
         ancre = 'topleft'
 
         if isinstance(self.pos, RelativePos):
             ancre = self.pos.aligne_infos['aligne']
 
-        self.rect.center = vect2_to_tuple(self.pos.xy)
+        self.info_dct['rect'].center = vect2_to_tuple(self.pos.xy)
         if 'top' in ancre:
-            self.rect.top = vect2_to_tuple(self.pos.xy)[1]
+            self.info_dct['rect'].top = vect2_to_tuple(self.pos.xy)[1]
         elif 'bottom' in ancre:
-            self.rect.bottom = vect2_to_tuple(self.pos.xy)[1]
+            self.info_dct['rect'].bottom = vect2_to_tuple(self.pos.xy)[1]
         if 'left' in ancre:
-            self.rect.left = vect2_to_tuple(self.pos.xy)[0]
+            self.info_dct['rect'].left = vect2_to_tuple(self.pos.xy)[0]
         elif 'right' in ancre:
-            self.rect.right = vect2_to_tuple(self.pos.xy)[0]
+            self.info_dct['rect'].right = vect2_to_tuple(self.pos.xy)[0]
 
     def update(self):
         """methode de mise à jour"""
@@ -234,17 +236,17 @@ class Element:
             self.pos.update()
         self.ancre()
 
-        if hasattr(self, 'objet') and hasattr(self.objet, 'rotation'):
+        if hasattr(self.info_dct['objet'], 'rotation'):
             # en degrés
-            self.surface = pygame.transform.rotate(
-                self.surface, self.objet.rotation - self.backup_rotation)
-            self.backup_rotation = self.objet.rotation
-        self.mask = (forme_mask(self.surface, UNIT_SIZE) if self.need_forming
-                     else pygame.mask.from_surface(self.surface))
+            self.info_dct['surface'] = pygame.transform.rotate(
+                self.info_dct['surface'], self.info_dct['objet'].rotation - self.backup_rotation)
+            self.backup_rotation = self.info_dct['objet'].rotation
+        self.mask = (forme_mask(self.info_dct['surface'], UNIT_SIZE) if self.info_dct['need_forming']
+                     else pygame.mask.from_surface(self.info_dct['surface']))
 
     def render(self):
         """méthode d'affichage"""
-        return ((self.surface, self.rect) if self.enabled
+        return ((self.info_dct['surface'], self.info_dct['rect']) if self.enabled
                 else (pygame.Surface((0, 0)), pygame.Rect(0, 0, 0, 0)))
 
 
@@ -276,9 +278,9 @@ class Frame:
     def update(self):
         """méthode de mise à jour"""
         # clear
-        self.element.surface = self.surface.copy()
+        self.element.info_dct['surface'] = self.surface.copy()
         self.interface.update()
-        self.element.surface.blits(list(self.interface.render()))
+        self.element.info_dct['surface'].blits(list(self.interface.render()))
 
     @classmethod
     def get_surface_by_name(cls, nom: str):
@@ -334,7 +336,7 @@ class StaticElement(Element):
         super().__init__(objet, surface, surface.get_rect(), interface_nom, mask is None)
         self.ancre()
         if mask is not None:
-            self.mask = mask
+            self.info_dct['mask'] = mask
 
     def update(self):
         """surécrit la méthode"""
@@ -388,9 +390,9 @@ class AnimElement(Element):
         """méthode de mise à jour"""
         texture, change = self.check_next_anim()
         if change:
-            self.surface = texture
+            self.info_dct['surface'] = texture
             self.backup_rotation = 0
-            self.rect = texture.get_rect()
+            self.info_dct['rect'] = texture.get_rect()
 
         super().update()
 
@@ -409,7 +411,7 @@ class Bouton:
 
     def on_click(self, event: pygame.event.Event):
         """active lors du clique"""
-        if self.element.rect.collidepoint(event.pos) and self.click == event.button:
+        if self.element.info_dct['rect'].collidepoint(event.pos) and self.click == event.button:
             self.fnct()
 
 
@@ -435,5 +437,5 @@ class Texte:
         surface = POLICE.render(
             self.texte, True, self.couleur)
         surface = pygame.transform.scale_by(surface, self.scale)
-        self.element.surface = surface
-        self.element.rect = surface.get_rect()
+        self.element.info_dct['surface'] = surface
+        self.element.info_dct['rect'] = surface.get_rect()
