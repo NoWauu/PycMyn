@@ -62,7 +62,8 @@ class HealthBar:
             surface.blit(self.unit_texture, (posx * self.width, 0))
 
         self.element.info_dct['surface'] = surface
-        self.element.info_dct['rect'] = self.element.info_dct['surface'].get_rect()
+        self.element.info_dct['rect'] = self.element.info_dct['surface'].get_rect(
+        )
 
 
 class DtRenderer:
@@ -126,9 +127,11 @@ class StaticTexture:
 
     def on_video_resize(self):
         """ajuste la texture à la fenêtre"""
-        self.element.info_dct['rect'] = pygame.transform.scale_by(self.element.info_dct['surface'],
-                                                         (max(utl.WINDOW.get_width()/
-                                                              self.element.info_dct['surface'].get_width(),
-                                                              utl.WINDOW.get_height() /
-                                                              self.element.info_dct['surface'].get_height())))
+        self.element.info_dct['rect'] = pygame.transform.scale_by(
+            self.element.info_dct['surface'],
+            (max(utl.WINDOW.get_width() /
+                 self.element.info_dct['surface'].get_width(
+            ),
+                utl.WINDOW.get_height() /
+                self.element.info_dct['surface'].get_height())))
         self.element.info_dct['rect'] = self.element.info_dct['surface'].get_rect()

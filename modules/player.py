@@ -111,12 +111,12 @@ class Player(Entity):
             self.mouvement_dct['speed'] = (self.mouvement_dct['base_speed'] *
                                            float(utl.TABLE[super().niveau if super().niveau
                                                            <= 19 else 20]["super_pacman_vitesse"]))
-            self.eat_bonus = 200
+            self.gameplay_dct['eat_bonus'] = 200
         else:
             self.mouvement_dct['speed'] = (self.mouvement_dct['base_speed'] *
                                            float(utl.TABLE[super().niveau if super().niveau
                                                            <= 19 else 20]["vitesse_pacman"]))
-            self.eat_bonus = 0
+            self.gameplay_dct['eat_bonus'] = 0
 
     def interact(self):
         """gestion des intéractions avec le joueur"""
@@ -137,10 +137,10 @@ class Player(Entity):
 
             elif entity.idt == 1:
                 # cas de collision avec un fantome
-                if entity.fear_state:
+                if entity.mouvement_dct['fear_state']:
                     entity.reset()
-                    utl.call('add_point', {'point': self.eat_bonus})
-                    self.eat_bonus *= 2
+                    utl.call('add_point', {'point': self.gameplay_dct['eat_bonus']})
+                    self.gameplay_dct['eat_bonus'] *= 2
                     sounds.GHOST_SOUND.play()
 
                 elif self.gameplay_dct['health'] > 1:

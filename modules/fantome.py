@@ -1,7 +1,7 @@
 """module de gestion des fantômes"""
 
 import random
-from typing import Tuple, List, Dict, Callable
+from typing import Tuple, List, Dict, Callable, Any
 
 import pygame
 
@@ -27,23 +27,22 @@ class Fantome(Entity):
         super().__init__(position, textures)
         self.idt = 1
         # mouvements
-        self.start_pos = position.xy
-        self.direction: int = 1
-        self.memoire: int = self.direction
-        self.base_speed = 80
-        self.speed = self.base_speed * \
-            float(utl.TABLE[super().niveau if super().niveau <=
-                  20 else 20]['vitesse_fantome'])
+        self.mouvement_dct: Dict[str, Any] = {
+            'start_pos': position.xy,
+            'direction': 1,
+            'memoire': 1,
+            'base_speed': 80,
+            'speed': 80 * float(utl.TABLE[super().niveau if super().niveau <=
+                  20 else 20]['vitesse_fantome']),
+            'deltat': 0,
+            'time': 0,
+            'fear_state': False,
+            'has_hard_collide': False
+        }
 
         self.base_comportement, periode = comportement_infos
         self.comportement = self.base_comportement
 
-        self.has_hard_collide = False
-
-        self.time = 0
-        self.deltat: int
-
-        self.fear_state = False
         self.fear_seq = Sequence([((utl.call, ['powerup', {'fear': False}]),
                                    int(utl.TABLE[Fantome.niveau if
                                                  Fantome.niveau <= 19 else 20]['fright_time'])
@@ -59,64 +58,70 @@ class Fantome(Entity):
 
     def reset(self):
         """reset le fantome lors de sa mort"""
-        self.pos.xy = self.start_pos
+        self.pos.xy = self.mouvement_dct['start_pos']
         self.animation.info_dct['rect'].topleft = vect2_to_tuple(self.pos.xy)
         self.set_fear(False)
         self.animation.reset_anim()
-        self.direction = 1
+        self.mouvement_dct['direction'] = 1
         self.seq.pause(1500)
 
     def calc_directions(self):
         """calcule les différentes directions possibles"""
         directions: List[int] = []
         for k in range(4):
-            if not (self.collide_wall(CASE[k](self.pos.xy, self.speed, self.deltat))
-                    or (self.has_hard_collide and
+            if not (self.collide_wall(CASE[k](self.pos.xy, self.mouvement_dct['speed'],
+                                              self.mouvement_dct['deltat']))
+                    or (self.mouvement_dct['has_hard_collide'] and
                         any(enit.hard_collide for enit in
                             self.collide_with(CASE[k](self.pos.xy,
-                                                      self.speed, self.deltat))))):
+                                                      self.mouvement_dct['speed'],
+                                                      self.mouvement_dct['deltat']))))):
                 directions.append(k)
         return directions
 
     def desire_direction(self):
         """change le fantome de direction"""
-        self.direction = self.comportement(self, [0, 1, 2, 3])
+        self.mouvement_dct['direction'] = self.comportement(self, [0, 1, 2, 3])
 
     def contourne_mur(self):
         """fait changer le fantome de direction lorsqu'il rencontre un mur"""
         directions = self.calc_directions()
         if directions:
-            self.direction = self.comportement(self, directions)
-            self.memoire = self.direction
+            self.mouvement_dct['direction'] = self.comportement(self, directions)
+            self.mouvement_dct['memoire'] = self.mouvement_dct['direction']
         else:
-            self.direction = -1
-        self.pos.xy = CASE[self.direction](self.pos.xy, self.speed, self.deltat)
+            self.mouvement_dct['direction'] = -1
+        self.pos.xy = CASE[self.mouvement_dct['direction']](self.pos.xy,
+                                                            self.mouvement_dct['speed'],
+                                                            self.mouvement_dct['deltat'])
 
     def controle(self) -> None:
         """gestion du déplacement d'une entité"""
         # le fantome ne peut que sortir de la zone
         if (0 < self.animation.info_dct['rect'].centerx < Fantome.fantome_map.get_size()[0] and
-                Fantome.fantome_map.overlap(self.animation.mask,
+                Fantome.fantome_map.overlap(self.animation.info_dct['mask'],
                                             self.animation.pos.xy) is not None):
-            self.has_hard_collide = False
+            self.mouvement_dct['has_hard_collide'] = False
         else:
-            self.has_hard_collide = True
+            self.mouvement_dct['has_hard_collide'] = True
 
-        if self.deltat > 50:
+        if self.mouvement_dct['deltat'] > 50:
             return
 
-        # on teste d'abord la mémoire
-        futur = CASE[self.direction](self.pos.xy, self.speed, self.deltat)
-        if not self.collide_wall(futur) and not (self.has_hard_collide and
+        # on teste d'abord la direction désirée
+        futur = CASE[self.mouvement_dct['direction']](self.pos.xy, self.mouvement_dct['speed'],
+                                                      self.mouvement_dct['deltat'])
+        if not self.collide_wall(futur) and not (self.mouvement_dct['has_hard_collide'] and
                                                  any(enit.hard_collide for enit in
                                                      self.collide_with(futur))):
             self.pos.xy = futur
-            self.memoire = self.direction
+            self.mouvement_dct['memoire'] = self.mouvement_dct['direction']
             return
 
-        # on teste ensuite la mémoire désirée
-        futur = CASE[self.memoire](self.pos.xy, self.speed, self.deltat)
-        if not self.collide_wall(futur) and not (self.has_hard_collide and
+        # on teste ensuite la mémoire
+        futur = CASE[self.mouvement_dct['memoire']](self.pos.xy, self.mouvement_dct['speed'],
+                                                    self.mouvement_dct['deltat'])
+        if not self.collide_wall(futur) and not (self.mouvement_dct['has_hard_collide'] and
                                                  any(enit.hard_collide for enit
                                                      in self.collide_with(futur))):
             self.pos.xy = futur
@@ -128,38 +133,40 @@ class Fantome(Entity):
         # on regarde si le fantome se situe sur une intersection
         if len(directions) >= 2:
             # on fait en sorte que le fantome ne revienne pas sur ses pas
-            if (self.memoire + 2) % 4 in directions:
-                directions.remove((self.memoire + 2) % 4)
+            if (self.mouvement_dct['memoire'] + 2) % 4 in directions:
+                directions.remove((self.mouvement_dct['memoire'] + 2) % 4)
             new_direction = self.comportement(self, directions)
 
         # s'il n'y a qu'une direction, on repart
         elif len(directions) > 0:
             new_direction = directions[0]
+            direct = self.mouvement_dct['direction']
             Sequence(
-                [((setattr, [self, 'direction', self.direction]), 200)],
+                [((utl.set_dct, [self.mouvement_dct, 'direction', direct]), 200)],
                 local=True).start()
-            self.direction = new_direction
+            self.mouvement_dct['direction'] = new_direction
 
         # s'il y a une nouvelle direction, on met
         # à jour la position et la mémoire
         if new_direction != -1:
-            futur = CASE[new_direction](self.pos.xy, self.speed, self.deltat)
+            futur = CASE[new_direction](self.pos.xy, self.mouvement_dct['speed'],
+                                        self.mouvement_dct['deltat'])
             self.pos.xy = futur
-            self.memoire = new_direction
+            self.mouvement_dct['memoire'] = new_direction
 
     def set_fear(self, fear: bool):
         """active ou désactive le comportement de peur"""
-        self.fear_state = fear
+        self.mouvement_dct['fear_state'] = fear
 
-        if self.fear_state:
-            self.speed = (float(utl.TABLE[super().niveau if super().niveau <= 19
+        if self.mouvement_dct['fear_state']:
+            self.mouvement_dct['speed'] = (float(utl.TABLE[super().niveau if super().niveau <= 19
                                           else 20]['fright_ghost_vitesse']) *
-                          self.base_speed)
+                          self.mouvement_dct['base_speed'])
             self.animation.start_anim('fear')
             self.fear_seq.start()
             self.comportement = evite
         else:
-            self.speed = (self.base_speed *
+            self.mouvement_dct['speed'] = (self.mouvement_dct['base_speed'] *
                           float(utl.TABLE[super().niveau if super(
                           ).niveau <= 19 else 20]['vitesse_fantome']))
             self.animation.reset_anim()
@@ -171,15 +178,16 @@ class Fantome(Entity):
 
     def update(self):
         """mise à jour"""
-        self.deltat = pygame.time.get_ticks() - self.time
-        self.time = pygame.time.get_ticks()
+        self.mouvement_dct['deltat'] = pygame.time.get_ticks() - self.mouvement_dct['time']
+        self.mouvement_dct['time'] = pygame.time.get_ticks()
 
         self.seq.step()
         self.controle()
+        print(self.mouvement_dct['direction'])
 
         self.fear_seq.step()
 
-        if self.fear_state and not self.animation.seq.sequence_infos['is_running']:
+        if self.mouvement_dct['fear_state'] and not self.animation.seq.sequence_infos['is_running']:
             self.animation.start_anim('fear_blink')
 
 

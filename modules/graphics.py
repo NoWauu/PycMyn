@@ -241,7 +241,8 @@ class Element:
             self.info_dct['surface'] = pygame.transform.rotate(
                 self.info_dct['surface'], self.info_dct['objet'].rotation - self.backup_rotation)
             self.backup_rotation = self.info_dct['objet'].rotation
-        self.mask = (forme_mask(self.info_dct['surface'], UNIT_SIZE) if self.info_dct['need_forming']
+        self.info_dct['mask'] = (forme_mask(self.info_dct['surface'], UNIT_SIZE)
+                     if self.info_dct['need_forming']
                      else pygame.mask.from_surface(self.info_dct['surface']))
 
     def render(self):
@@ -262,11 +263,11 @@ class Frame:
                  pos: 'pygame.Vector3 | RelativePos',
                  interface_nom: str | None = None) -> None:
         self.surface = surface
-        self.rect = self.surface.get_rect()
+        rect = self.surface.get_rect()
         self.pos = pos
         self.interface = interface
         self.element = Element(self, self.surface.copy(),
-                               self.rect, interface_nom, False)
+                               rect, interface_nom, False)
 
         if nom not in Frame.frames:
             Frame.frames[nom] = self

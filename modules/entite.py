@@ -75,7 +75,7 @@ class Entity:
         Entity.group.append(self)
 
     def collide_with(self, point: pygame.Vector2 | None = None) -> List['Entity']:
-        """return a list containing the sprites colliding with this one"""
+        """renvoie une liste d'entité rentrant en collision avec celle-ci"""
         Entity.group.remove(self)
         lis: List['Entity'] = []
 
