@@ -1,5 +1,7 @@
-![trpNSI](/ressources/textures/trophees-nsi-logo-orange.png )
-<img align="left" width="100" height="100" src="/ressources/textures/logo.png">
+<p float="left">
+  <img src="/ressources/textures/trophees-nsi-logo-orange.png" width="100" />
+  <img src="/ressources/textures/logo.png" width="100" /> 
+</p>
 
 # PycMyn (Librairie Pygame)
 
